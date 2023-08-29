@@ -136,19 +136,6 @@ def evaluate(data_path: str, bucket_name: str, model_name: str, trained_model: I
     return bool(test_acc > 0.6)
 
 
-@component(base_image='tensorflow/tensorflow:latest-gpu')
-def pusher_gcb(data_path: str, model_name: str, trainedModel: InputPath(Model), evaluation_ok: bool):
-    from tensorflow import keras
-
-    if evaluation_ok:
-        # Load the saved Keras model
-        model = keras.models.load_model(trainedModel)
-        modelPath = f'{data_path}{model_name}/1'
-        model.save(modelPath)
-    else:
-        print('did not save model, due to evaluation error.')
-
-
 @component(base_image='google/cloud-sdk', packages_to_install=["google-cloud-aiplatform"])
 def deploy(trainedModel: InputPath(Model), evaluation_ok: bool, display_name: str) -> str:
     from google.cloud import aiplatform
@@ -158,7 +145,7 @@ def deploy(trainedModel: InputPath(Model), evaluation_ok: bool, display_name: st
             display_name=display_name,
             location="europe-west1",
             # if new version of existing model, use model ID. Can be deleted if not.
-            # parent_model="6119591449131483136",
+            parent_model="4349940678365544448",
             serving_container_image_uri="us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-6:latest",
             artifact_uri=trainedModel,
         )
@@ -256,9 +243,6 @@ def pipeline_func(
 
     evaluate_container = evaluate(data_path, bucket_name, model_name, training_container.outputs["trainedModel"],
                                   data_gen_container.outputs["test_data"])
-
-    pusher_gcb_container = pusher_gcb(data_path, model_name, training_container.outputs["trainedModel"],
-                                      evaluate_container.output)
 
     deploy_container = deploy(training_container.outputs["trainedModel"], evaluate_container.output,
                                      model_name)
