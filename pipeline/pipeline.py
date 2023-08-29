@@ -31,7 +31,7 @@ from kfp.v2.dsl import InputPath, OutputPath, component, Dataset, Model
 # ## Create the pipeline steps
 
 @component(base_image='tensorflow/tensorflow:latest-gpu')
-def data_gen(data_path: str, train_data: OutputPath(Dataset), test_data: OutputPath(Dataset)):
+def data_gen(data_path: str, bucket_name: str, train_data: OutputPath(Dataset), test_data: OutputPath(Dataset)):
     # func_to_container_op requires packages to be imported inside the function.
     import pickle
 
@@ -45,6 +45,22 @@ def data_gen(data_path: str, train_data: OutputPath(Dataset), test_data: OutputP
 
     with open(test_data, 'wb') as f:
         pickle.dump((x_test, y_test), f)
+
+    from google.cloud import storage
+    import json
+    import re
+
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+
+    with open('tmp.json', 'w', encoding='utf-8') as f:
+        json.dump({'progress': 'data_gen_done'}, f, ensure_ascii=False, indent=4)
+
+    path = re.findall(r'gs:\/\/[a-zA-Z-]*\/\s*([^\n\r]*)', data_path)
+    target_blob = bucket.blob(f'{path.pop()}api/progress.json')
+
+    with open('tmp.json', 'r') as f:
+        target_blob.upload_from_file(f)
 
 
 @component(base_image='tensorflow/tensorflow:latest-gpu')
@@ -134,7 +150,7 @@ def pusher_gcb(data_path: str, model_name: str, trainedModel: InputPath(Model), 
 
 
 @component(base_image='google/cloud-sdk', packages_to_install=["google-cloud-aiplatform"])
-def pusher_vertex(trainedModel: InputPath(Model), evaluation_ok: bool, display_name: str) -> str:
+def deploy(trainedModel: InputPath(Model), evaluation_ok: bool, display_name: str) -> str:
     from google.cloud import aiplatform
 
     if evaluation_ok:
@@ -142,7 +158,7 @@ def pusher_vertex(trainedModel: InputPath(Model), evaluation_ok: bool, display_n
             display_name=display_name,
             location="europe-west1",
             # if new version of existing model, use model ID. Can be deleted if not.
-            parent_model="6119591449131483136",
+            # parent_model="6119591449131483136",
             serving_container_image_uri="us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-6:latest",
             artifact_uri=trainedModel,
         )
@@ -152,11 +168,7 @@ def pusher_vertex(trainedModel: InputPath(Model), evaluation_ok: bool, display_n
         print(uploaded_model.display_name)
         print(uploaded_model.resource_name)
 
-        endpoint = aiplatform.Endpoint.create(
-            display_name=display_name + "_endpoint",
-            project="ai-gilde",
-            location="europe-west1",
-        )
+        endpoint = aiplatform.Endpoint('projects/1053517987499/locations/europe-west1/endpoints/8983317862185697280')
 
         print(endpoint.display_name)
         print(endpoint.resource_name)
@@ -237,7 +249,7 @@ def pipeline_func(
         model_name: str,
         image_number: int,
 ):
-    data_gen_container = data_gen(DATA_PATH_DATA)
+    data_gen_container = data_gen(data_path, bucket_name)
 
     training_container = train(data_path=data_path,
                                train_data=data_gen_container.outputs["train_data"])
@@ -248,10 +260,10 @@ def pipeline_func(
     pusher_gcb_container = pusher_gcb(data_path, model_name, training_container.outputs["trainedModel"],
                                       evaluate_container.output)
 
-    pusher_vertex_container = pusher_vertex(training_container.outputs["trainedModel"], evaluate_container.output,
-                                            model_name)
+    deploy_container = deploy(training_container.outputs["trainedModel"], evaluate_container.output,
+                                     model_name)
 
-    verify_endpoint_container = verify_endpoint(pusher_vertex_container.output, data_gen_container.outputs["test_data"])
+    verify_endpoint_container = verify_endpoint(deploy_container.output, data_gen_container.outputs["test_data"])
 
 
 # ## Run Pipeline
@@ -261,29 +273,23 @@ arguments = {"data_path": DATA_PATH,
              "model_name": MODEL_NAME,
              "image_number": IMAGE_NUMBER}
 
-# ### Option 2: Vertex AI
+# Deploy with Kubeflow
 
-PIPELINE_NAME = MODEL_NAME + '-pipeline'
-PIPELINE_DEFINITION_FILE = MODEL_NAME + '_vertex.json'
+# Import Kubeflow SDK
+import kfp
 
-from kfp.v2 import compiler
+client = kfp.Client(host='https://23dd227a31eaadf-dot-europe-west1.pipelines.googleusercontent.com')
 
-compiler.Compiler().compile(pipeline_func=pipeline_func,
-                            package_path=PIPELINE_DEFINITION_FILE)
+experiment_name = MODEL_NAME+'_kubeflow'
+run_name = pipeline_func.__name__ + ' run'
 
-import google.cloud.aiplatform as aip
+# Compile pipeline to generate compressed YAML definition of the pipeline.
+kfp.compiler.Compiler(mode=kfp.dsl.PipelineExecutionMode.V2_COMPATIBLE).compile(pipeline_func,
+                                                                                '{}.yaml'.format(experiment_name))
 
-aip.init(
-    project=GOOGLE_CLOUD_PROJECT,
-    location=GOOGLE_CLOUD_REGION,
-)
+run_result = client.create_run_from_pipeline_package('{}.yaml'.format(experiment_name),
+                                                     experiment_name=experiment_name,
+                                                     run_name=run_name,
+                                                     arguments=arguments)
 
-# Prepare the pipeline job
-job = aip.PipelineJob(
-    display_name=PIPELINE_NAME,
-    template_path=PIPELINE_DEFINITION_FILE,
-    pipeline_root=DATA_PATH,
-    parameter_values=arguments
-)
-
-job.submit()
+client.wait_for_run_completion(run_id=run_result.run_id, timeout=36000)
