@@ -1,32 +1,39 @@
 import * as React from 'react';
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import ProTip from './ProTip';
-
-function Copyright() {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}.
-    </Typography>
-  );
-}
+import {Box, Button, Grid, TextField} from "@mui/material";
 
 export default function App() {
-  return (
-    <Container maxWidth="sm">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Material UI Create React App example in TypeScript
-        </Typography>
-        <ProTip />
-        <Copyright />
-      </Box>
-    </Container>
-  );
+    return (
+        <Container maxWidth="lg">
+            <Grid container spacing={1}>
+                <Grid item xs={6}>
+                    <TextField id="word" label="Word" variant="outlined" fullWidth />
+                </Grid>
+                <Grid item xs={6}>
+                    <TextField id="label" label="Label" variant="outlined" fullWidth />
+                </Grid>
+            </Grid>
+            <Box mt={3}>
+                <Grid container spacing={3} justifyContent="flex-end">
+                    <Grid item xs={5}>
+                        <Button variant="contained">
+                            Predict
+                        </Button>
+                    </Grid>
+                    <Grid item>
+                        <Button variant="contained">
+                            Send new train data
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Box>
+            <Box mt={5}>
+                <Grid container justifyContent="flex-end">
+                    <Button variant="contained" color="error">
+                        Retrain
+                    </Button>
+                </Grid>
+            </Box>
+        </Container>
+    );
 }
