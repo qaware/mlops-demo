@@ -35,27 +35,16 @@ def data_gen(data_path: str, bucket_name: str, train_data: OutputPath(Dataset), 
     # func_to_container_op requires packages to be imported inside the function.
     import pickle
 
-    import tensorflow as tf
+    import tensorflow.keras as tk
+    fashion_mnist = tk.datasets.fashion_mnist
 
-    data_x = [
-        'good',  'well done', 'nice', 'Excellent',
-        'Bad', 'OOps I hate it deadly', 'embrassing',
-        'A piece of shit']
-
-    # one hot encoding
-
-    one_hot_x = [tf.keras.preprocessing.text.one_hot(d, 50) for d in data_x]
-
-    # padding
-
-    padded_x = tf.keras.preprocessing.sequence.pad_sequences(one_hot_x, maxlen=4, padding = 'post')
-
+    (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
 
     with open(train_data, 'wb') as f:
-        pickle.dump(padded_x, f)
+        pickle.dump((x_train, y_train), f)
 
     with open(test_data, 'wb') as f:
-        pickle.dump(padded_x, f)
+        pickle.dump((x_test, y_test), f)
 
     from google.cloud import storage
     import json
@@ -74,46 +63,37 @@ def data_gen(data_path: str, bucket_name: str, train_data: OutputPath(Dataset), 
         target_blob.upload_from_file(f)
 
 
-@component(base_image='tensorflow/tensorflow:latest-gpu', packages_to_install=['matplotlib'])
+@component(base_image='tensorflow/tensorflow:latest-gpu')
 def train(data_path: str, train_data: InputPath(Dataset), trainedModel: OutputPath(Model)):
     # func_to_container_op requires packages to be imported inside the function.
     import pickle
 
-    import numpy as np
-    import tensorflow as tf
+    from tensorflow import keras
 
     with open(train_data, 'rb') as f:
-        padded_x = pickle.load(f)
+        train_d = pickle.load(f)
 
-    label_x = np.array([1,1,1,1, 0,0,0,0])
+    (train_images, train_labels, *x) = train_d
 
-    # Architecting our Model
+    # Normalize the data so that the values all fall between 0 and 1.
+    train_images = train_images / 255.0
 
-    model = tf.keras.models.Sequential([
-        tf.keras.layers.Embedding(50, 8, input_length=4),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(1, activation='sigmoid')
+    # Define the model using Keras.
+    model = keras.Sequential([
+        keras.layers.Flatten(input_shape=(28, 28)),
+        keras.layers.Dense(128, activation='relu'),
+        keras.layers.Dense(10)
     ])
 
-    # specifying training params
-
-    model.compile(optimizer='adam', loss='binary_crossentropy',
-              metrics=['accuracy'])
+    model.compile(optimizer='adam',
+                  loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                  metrics=['accuracy'])
 
     # Run a training job with specified number of epochs
-
-    history = model.fit(padded_x, label_x, epochs=1000,
-                    batch_size=2, verbose=0)
-
-    import matplotlib.pyplot as plt
-
-    plt.plot(history.history['loss'])
+    model.fit(train_images, train_labels, epochs=10)
 
     # Save the model to the designated
     model.save(trainedModel)
-
-    modelPath = f'{data_path}demo-model/1'
-    model.save(modelPath)
 
 
 @component(base_image='tensorflow/tensorflow:latest-gpu', packages_to_install=['google-cloud-storage'])
@@ -166,7 +146,7 @@ def deploy(trainedModel: InputPath(Model), evaluation_ok: bool, display_name: st
             location="europe-west1",
             # if new version of existing model, use model ID. Can be deleted if not.
             parent_model="4349940678365544448",
-            serving_container_image_uri="europe-west1-docker.pkg.dev/ai-gilde/demo/serving-container:latest",
+            serving_container_image_uri="us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-6:latest",
             artifact_uri=trainedModel,
         )
 
@@ -193,8 +173,6 @@ def deploy(trainedModel: InputPath(Model), evaluation_ok: bool, display_name: st
 
         print(uploaded_model.display_name)
         print(uploaded_model.resource_name)
-
-        print('ok9')
 
         return endpoint.resource_name
 
@@ -227,10 +205,15 @@ def verify_endpoint(endpoint: str, test_data_file: InputPath(Dataset)):
         endpoint=endpoint_id,
     )
 
-    #### Data
+    #### Get data for instances request, replace with your own test data
+    with open(test_data_file, 'rb') as f:
+        test_data = pickle.load(f)
 
-    instances = ['this is cool', 'this is bad']
+    test_images, test_labels = test_data
+    test_images = test_images / 255.0
 
+    # Set data values for the prediction request.
+    instances = test_images[0:3].tolist()
     ####
 
     # Send a prediction request and get response.
@@ -258,10 +241,10 @@ def pipeline_func(
     training_container = train(data_path=data_path,
                                train_data=data_gen_container.outputs["train_data"])
 
-    #evaluate_container = evaluate(data_path, bucket_name, model_name, training_container.outputs["trainedModel"],
-    #                              data_gen_container.outputs["test_data"])
+    evaluate_container = evaluate(data_path, bucket_name, model_name, training_container.outputs["trainedModel"],
+                                  data_gen_container.outputs["test_data"])
 
-    deploy_container = deploy(training_container.outputs["trainedModel"], True,
+    deploy_container = deploy(training_container.outputs["trainedModel"], evaluate_container.output,
                                      model_name)
 
     verify_endpoint_container = verify_endpoint(deploy_container.output, data_gen_container.outputs["test_data"])
@@ -291,7 +274,6 @@ kfp.compiler.Compiler(mode=kfp.dsl.PipelineExecutionMode.V2_COMPATIBLE).compile(
 run_result = client.create_run_from_pipeline_package('{}.yaml'.format(experiment_name),
                                                      experiment_name=experiment_name,
                                                      run_name=run_name,
-                                                     enable_caching=False,
                                                      arguments=arguments)
 
 client.wait_for_run_completion(run_id=run_result.run_id, timeout=36000)
