@@ -9,6 +9,8 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
+ENV GOOGLE_APPLICATION_CREDENTIALS=key.json
+
 EXPOSE 8080
 
 ENTRYPOINT ["python3"]

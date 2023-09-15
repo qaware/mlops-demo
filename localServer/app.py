@@ -1,11 +1,14 @@
 from flask import Flask
 
+from pipeline import run_pipeline
+
 app = Flask(__name__)
 
 
 @app.route('/run/', methods=['POST'])
 def run():
-    return "Not Implemented"
+    run_pipeline()
+    return "OK"
 
 
 @app.route('/status/', methods=['GET'])

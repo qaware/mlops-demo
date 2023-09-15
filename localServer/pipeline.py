@@ -20,7 +20,6 @@ MODEL_NAME = 'demo-model'
 
 PIPELINE_DESCRIPTION = 'Our demo pipeline.'
 
-# ## Install Dependencies
 
 # Import Kubeflow SDK
 import kfp.v2.dsl as dsl
@@ -157,7 +156,7 @@ def evaluate(data_path: str, bucket_name: str, model_name: str, trained_model: I
 
 
 @component(base_image='google/cloud-sdk', packages_to_install=["google-cloud-aiplatform"])
-def deploy(trainedModel: InputPath(Model), evaluation_ok: bool, display_name: str) -> str:
+def deploy(trained_model: InputPath(Model), evaluation_ok: bool, display_name: str) -> str:
     from google.cloud import aiplatform
 
     if evaluation_ok:
@@ -167,7 +166,7 @@ def deploy(trainedModel: InputPath(Model), evaluation_ok: bool, display_name: st
             # if new version of existing model, use model ID. Can be deleted if not.
             parent_model="4349940678365544448",
             serving_container_image_uri="europe-west1-docker.pkg.dev/ai-gilde/demo/serving-container:latest",
-            artifact_uri=trainedModel,
+            artifact_uri=trained_model,
         )
 
         uploaded_model.wait()
@@ -253,7 +252,7 @@ def pipeline_func(
         model_name: str,
         image_number: int,
 ):
-    data_gen_container = data_gen(data_path, bucket_name)
+    data_gen_container = data_gen(data_path=data_path, bucket_name=bucket_name)
 
     training_container = train(data_path=data_path,
                                train_data=data_gen_container.outputs["train_data"])
@@ -261,37 +260,45 @@ def pipeline_func(
     #evaluate_container = evaluate(data_path, bucket_name, model_name, training_container.outputs["trainedModel"],
     #                              data_gen_container.outputs["test_data"])
 
-    deploy_container = deploy(training_container.outputs["trainedModel"], True,
-                                     model_name)
+    deploy_container = deploy(trained_model=training_container.outputs["trainedModel"],
+                              evaluation_ok=True,
+                              display_name=model_name)
 
-    verify_endpoint_container = verify_endpoint(deploy_container.output, data_gen_container.outputs["test_data"])
+    verify_endpoint_container = verify_endpoint(endpoint=deploy_container.output,
+                                                test_data_file=data_gen_container.outputs["test_data"])
 
 
 # ## Run Pipeline
 
-arguments = {"data_path": DATA_PATH,
-             "bucket_name": GCS_BUCKET_NAME,
-             "model_name": MODEL_NAME,
-             "image_number": IMAGE_NUMBER}
+def run_pipeline():
 
-# Deploy with Kubeflow
+    arguments = {"data_path": DATA_PATH,
+                 "bucket_name": GCS_BUCKET_NAME,
+                 "model_name": MODEL_NAME,
+                 "image_number": IMAGE_NUMBER}
 
-# Import Kubeflow SDK
-import kfp
+    # Deploy with Kubeflow
 
-client = kfp.Client(host='https://23dd227a31eaadf-dot-europe-west1.pipelines.googleusercontent.com')
+    # Import Kubeflow SDK
+    import kfp
 
-experiment_name = MODEL_NAME+'_kubeflow'
-run_name = pipeline_func.__name__ + ' run'
+    client = kfp.Client(host='https://23dd227a31eaadf-dot-europe-west1.pipelines.googleusercontent.com')
 
-# Compile pipeline to generate compressed YAML definition of the pipeline.
-kfp.compiler.Compiler(mode=kfp.dsl.PipelineExecutionMode.V2_COMPATIBLE).compile(pipeline_func,
+    experiment_name = MODEL_NAME+'_kubeflow'
+    run_name = pipeline_func.__name__ + ' run'
+
+    # Compile pipeline to generate compressed YAML definition of the pipeline.
+    kfp.compiler.Compiler(mode=kfp.dsl.PipelineExecutionMode.V2_COMPATIBLE).compile(pipeline_func,
                                                                                 '{}.yaml'.format(experiment_name))
 
-run_result = client.create_run_from_pipeline_package('{}.yaml'.format(experiment_name),
-                                                     experiment_name=experiment_name,
-                                                     run_name=run_name,
-                                                     enable_caching=False,
-                                                     arguments=arguments)
+    run_result = client.create_run_from_pipeline_package('{}.yaml'.format(experiment_name),
+                                                         experiment_name=experiment_name,
+                                                         run_name=run_name,
+                                                         enable_caching=False,
+                                                         arguments=arguments)
 
-client.wait_for_run_completion(run_id=run_result.run_id, timeout=36000)
+    print(run_result)
+
+    # client.wait_for_run_completion(run_id=run_result.run_id, timeout=36000)
+
+# run_pipeline()
