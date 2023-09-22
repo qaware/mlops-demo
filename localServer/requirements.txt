@@ -2,3 +2,5 @@ flask
 google-cloud-storage
 tensorflow
 kfp==1.8.22
+google-cloud-aiplatform
+numpy
