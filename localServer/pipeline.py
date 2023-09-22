@@ -24,22 +24,27 @@ PIPELINE_DESCRIPTION = 'Our demo pipeline.'
 # Import Kubeflow SDK
 import kfp.v2.dsl as dsl
 
-from kfp.v2.dsl import InputPath, OutputPath, component, Dataset, Model
+from kfp.v2.dsl import InputPath, OutputPath, component, Dataset, Model, Artifact
 
 
 # ## Create the pipeline steps
 
 @component(base_image='tensorflow/tensorflow:latest-gpu')
-def data_gen(data_path: str, bucket_name: str, train_data: OutputPath(Dataset), test_data: OutputPath(Dataset)):
+def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPath(Dataset), test_data: OutputPath(Dataset), train_labels: OutputPath(Artifact)):
     # func_to_container_op requires packages to be imported inside the function.
     import pickle
 
     import tensorflow as tf
 
-    data_x = [
-        'good',  'well done', 'nice', 'Excellent',
-        'Bad', 'OOps I hate it deadly', 'embrassing',
-        'A piece of shit']
+    data_x = []
+    label_x = []
+
+    for item in words['good_words']:
+        data_x.append(item)
+        label_x.append(1)
+    for item in words['bad_words']:
+        data_x.append(item)
+        label_x.append(0)
 
     # one hot encoding
 
@@ -55,6 +60,9 @@ def data_gen(data_path: str, bucket_name: str, train_data: OutputPath(Dataset), 
 
     with open(test_data, 'wb') as f:
         pickle.dump(padded_x, f)
+
+    with open(train_labels, 'wb') as f:
+        pickle.dump(label_x, f)
 
     from google.cloud import storage
     import json
@@ -74,17 +82,19 @@ def data_gen(data_path: str, bucket_name: str, train_data: OutputPath(Dataset), 
 
 
 @component(base_image='tensorflow/tensorflow:latest-gpu', packages_to_install=['matplotlib'])
-def train(data_path: str, train_data: InputPath(Dataset), trainedModel: OutputPath(Model)):
+def train(data_path: str, train_data: InputPath(Dataset), train_labels: InputPath(Artifact), trainedModel: OutputPath(Model)):
     # func_to_container_op requires packages to be imported inside the function.
     import pickle
 
-    import numpy as np
     import tensorflow as tf
+
+    import numpy as np
 
     with open(train_data, 'rb') as f:
         padded_x = pickle.load(f)
 
-    label_x = np.array([1,1,1,1, 0,0,0,0])
+    with open(train_labels, 'rb') as f:
+        label_x = pickle.load(f)
 
     # Architecting our Model
 
@@ -101,7 +111,7 @@ def train(data_path: str, train_data: InputPath(Dataset), trainedModel: OutputPa
 
     # Run a training job with specified number of epochs
 
-    history = model.fit(padded_x, label_x, epochs=1000,
+    history = model.fit(np.asarray(padded_x), np.asarray(label_x), epochs=1000,
                     batch_size=2, verbose=0)
 
     import matplotlib.pyplot as plt
@@ -251,31 +261,34 @@ def pipeline_func(
         bucket_name: str,
         model_name: str,
         image_number: int,
+        words: dict,
 ):
-    data_gen_container = data_gen(data_path=data_path, bucket_name=bucket_name)
+    data_gen_container = data_gen(data_path=data_path, bucket_name=bucket_name, words=words)
 
     training_container = train(data_path=data_path,
-                               train_data=data_gen_container.outputs["train_data"])
+                               train_data=data_gen_container.outputs['train_data'],
+                               train_labels=data_gen_container.outputs['train_labels'])
 
     #evaluate_container = evaluate(data_path, bucket_name, model_name, training_container.outputs["trainedModel"],
     #                              data_gen_container.outputs["test_data"])
 
-    deploy_container = deploy(trained_model=training_container.outputs["trainedModel"],
+    deploy_container = deploy(trained_model=training_container.outputs['trainedModel'],
                               evaluation_ok=True,
                               display_name=model_name)
 
     verify_endpoint_container = verify_endpoint(endpoint=deploy_container.output,
-                                                test_data_file=data_gen_container.outputs["test_data"])
+                                                test_data_file=data_gen_container.outputs['test_data'])
 
 
 # ## Run Pipeline
 
-def run_pipeline():
+def run_pipeline(words: dict):
 
     arguments = {"data_path": DATA_PATH,
                  "bucket_name": GCS_BUCKET_NAME,
                  "model_name": MODEL_NAME,
-                 "image_number": IMAGE_NUMBER}
+                 "image_number": IMAGE_NUMBER,
+                 "words": words}
 
     # Deploy with Kubeflow
 

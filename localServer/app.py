@@ -1,4 +1,6 @@
-from flask import Flask
+import json
+
+from flask import Flask, request
 
 from pipeline import run_pipeline
 
@@ -7,8 +9,12 @@ app = Flask(__name__)
 
 @app.route('/run/', methods=['POST'])
 def run():
-    run_pipeline()
-    return "OK"
+    content_type = request.headers.get('Content-Type')
+    if content_type == 'application/json':
+        run_pipeline(json.loads(request.data))
+        return "OK"
+    else:
+        return 'Content-Type not supported!'
 
 
 @app.route('/status/', methods=['GET'])
