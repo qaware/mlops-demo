@@ -24,6 +24,7 @@ def status():
     return "Not Implemented"
 
 
+# Prediction needs Permission 'Vertex AI User'
 @app.route('/predict/', methods=['POST'])
 def predict():
     content_type = request.headers.get('Content-Type')
@@ -51,7 +52,11 @@ def predict():
         # Send a prediction request and get response.
         response = client.predict(endpoint=endpoint, instances=instances)
 
-        return response
+        predictions = []
+        for prediction in response.predictions:
+            predictions.append(prediction)
+
+        return json.dumps(predictions)
     else:
         return 'Content-Type not supported!'
 
