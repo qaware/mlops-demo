@@ -1,10 +1,10 @@
 import json
 
-from flask import Flask, request
+from flask import Flask, request, Response
 
 from pipeline import run_pipeline
 
-from google.cloud import aiplatform
+from google.cloud import aiplatform, storage
 
 app = Flask(__name__)
 
@@ -19,12 +19,19 @@ def run():
         return 'Content-Type not supported!'
 
 
+# Needs Permission 'Storage Object User'
 @app.route('/status/', methods=['GET'])
 def status():
-    return "Not Implemented"
+    storage_client = storage.Client()
+
+    bucket = storage_client.bucket('ai-gilde-kubeflowpipelines-default')
+
+    blob = bucket.blob('demo/api/progress.json')
+
+    return Response(blob.download_as_string(), mimetype='application/json')
 
 
-# Prediction needs Permission 'Vertex AI User'
+# Needs Permission 'Vertex AI User'
 @app.route('/predict/', methods=['POST'])
 def predict():
     content_type = request.headers.get('Content-Type')
