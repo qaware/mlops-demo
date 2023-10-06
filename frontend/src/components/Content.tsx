@@ -3,6 +3,7 @@ import Container from '@mui/material/Container';
 import { Box } from "@mui/material";
 import TrainingContent from './TrainingContent';
 import PredictionContent from './PredictionContent';
+import DocumentationContent from './DocumentationContent';
 
 export default function Content() {
     return (
@@ -13,7 +14,7 @@ export default function Content() {
             </Box>
             <TrainingContent/>
             <PredictionContent/>
-
+            <DocumentationContent/>
         </Container>
     );
 }

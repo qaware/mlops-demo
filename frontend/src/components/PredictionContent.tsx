@@ -1,11 +1,13 @@
 import * as React from 'react';
-import Container from '@mui/material/Container';
-import { Box, Button, Grid, TextField } from "@mui/material";
+import { Box, Button, Grid, Paper, TextField, Typography } from "@mui/material";
 
 export default function PredictionContent() {
     return (
 
-        <Container style={{margin: '2em'}}>
+        <Paper elevation={0} style={{margin: '2em', padding: '1em'}} variant='outlined'>
+            <Typography variant="h4" component="div" sx={{flexGrow: 1}}>
+                Prediction
+            </Typography>
             <Grid item xs={6}>
                 <TextField id="label" label="Label" variant="outlined" fullWidth/>
             </Grid>
@@ -21,6 +23,6 @@ export default function PredictionContent() {
                     </Button>
                 </Grid>
             </Box>
-        </Container>
+        </Paper>
     );
 }
