@@ -1,8 +1,27 @@
 import * as React from "react";
 
+export async function getStatus() {
+    await fetch('http://localhost:8080/status/', {
+        method: 'GET',
+    })
+        .then((response) => response.text())
+        .then((data) => {
+            console.log(data)
+        })
+        .catch((err) => {
+            console.log(err.message);
+        });
+}
+
+export function statusInterval() {
+    setInterval(() => {
+        getStatus()
+    }, 10000);
+}
+
 export function triggerTraining(event: React.ChangeEvent<any>): Promise<void> {
     event.preventDefault();
-    return runPipeline(event.target.goodWords.value.replace(/\s+/g, '').split(','),event.target.badWords.value.replace(/\s+/g, '').split(','));; // TODO: call backend
+    return runPipeline(event.target.goodWords.value.replace(/\s+/g, '').split(','),event.target.badWords.value.replace(/\s+/g, '').split(','));
 }
 
 const runPipeline = async (goodWords: string[], badWords: string[]) => {
@@ -19,7 +38,8 @@ const runPipeline = async (goodWords: string[], badWords: string[]) => {
         .then((response) => response.text())
         .then((data) => {
             if (data == 'OK') {
-                alert('Pipeline started!')
+                alert('Pipeline started!');
+                statusInterval();
             } else {
                 alert(data)
             }
