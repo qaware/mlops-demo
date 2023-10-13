@@ -3,10 +3,10 @@ import { Box, Button, Grid, Paper, TextField, Typography } from "@mui/material";
 
 const handleSubmit = (event: React.ChangeEvent<any>) => {
     event.preventDefault();
-    prediction(event.target[0].value.replace(/\s+/g, '').split(','));
+    predict(event.target[0].value.replace(/\s+/g, '').split(','));
 };
 
-const prediction = async (words: string[]) => {
+const predict = async (words: string[]) => {
     await fetch('http://localhost:8080/predict/', {
         method: 'POST',
         body: JSON.stringify({
