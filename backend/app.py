@@ -13,7 +13,7 @@ app = Flask(__name__)
 def run():
     content_type = request.headers.get('Content-Type')
     if content_type == 'application/json':
-        run_pipeline(json.loads(request.data))
+        run_pipeline(json.loads(request.data), 'https://f7187cd706a2d41-dot-europe-west1.pipelines.googleusercontent.com')
         return "OK"
     else:
         return 'Content-Type not supported!'
@@ -38,7 +38,7 @@ def predict():
     if content_type == 'application/json':
         google_cloud_project = '1053517987499'
         google_cloud_region = 'europe-west1'
-        endpoint_id = '8983317862185697280'
+        endpoint_id = '4778064117942452224'
 
         # The AI Platform services require regional API endpoints.
         client_options = {

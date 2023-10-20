@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ## Set all Variables:
+import kfp.v2.dsl as dsl
+
+from kfp.v2.dsl import InputPath, OutputPath, component, Dataset, Model, Artifact
+
+import kfp
+
+## Set all Variables:
 
 GOOGLE_CLOUD_PROJECT = "ai-gilde"
 GOOGLE_CLOUD_REGION = 'europe-west1'
@@ -11,21 +17,9 @@ print("GCP project ID:" + GOOGLE_CLOUD_PROJECT)
 GCS_BUCKET_NAME = 'ai-gilde-kubeflowpipelines-default'
 
 DATA_PATH = 'gs://{}/demo/'.format(GCS_BUCKET_NAME)
-DATA_PATH_DATA = '/data/'.format(DATA_PATH)
-
-# An integer representing an image from the test set that the model will attempt to predict the label for.
-IMAGE_NUMBER = 0
 
 MODEL_NAME = 'demo-model'
-
 PIPELINE_DESCRIPTION = 'Our demo pipeline.'
-
-
-# Import Kubeflow SDK
-import kfp.v2.dsl as dsl
-
-from kfp.v2.dsl import InputPath, OutputPath, component, Dataset, Model, Artifact
-
 
 # ## Create the pipeline steps
 
@@ -54,7 +48,6 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
 
     padded_x = tf.keras.preprocessing.sequence.pad_sequences(one_hot_x, maxlen=4, padding = 'post')
 
-
     with open(train_data, 'wb') as f:
         pickle.dump(padded_x, f)
 
@@ -82,7 +75,7 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
 
 
 @component(base_image='tensorflow/tensorflow:latest-gpu', packages_to_install=['matplotlib'])
-def train(data_path: str, train_data: InputPath(Dataset), train_labels: InputPath(Artifact), trainedModel: OutputPath(Model)):
+def train(data_path: str, bucket_name: str, train_data: InputPath(Dataset), train_labels: InputPath(Artifact), trainedModel: OutputPath(Model)):
     # func_to_container_op requires packages to be imported inside the function.
     import pickle
 
@@ -107,12 +100,12 @@ def train(data_path: str, train_data: InputPath(Dataset), train_labels: InputPat
     # specifying training params
 
     model.compile(optimizer='adam', loss='binary_crossentropy',
-              metrics=['accuracy'])
+                  metrics=['accuracy'])
 
     # Run a training job with specified number of epochs
 
     history = model.fit(np.asarray(padded_x), np.asarray(label_x), epochs=1000,
-                    batch_size=2, verbose=0)
+                        batch_size=2, verbose=0)
 
     import matplotlib.pyplot as plt
 
@@ -123,6 +116,22 @@ def train(data_path: str, train_data: InputPath(Dataset), train_labels: InputPat
 
     modelPath = f'{data_path}demo-model/1'
     model.save(modelPath)
+
+    from google.cloud import storage
+    import json
+    import re
+
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+
+    with open('tmp.json', 'w', encoding='utf-8') as f:
+        json.dump({'progress': 'train_done'}, f, ensure_ascii=False, indent=4)
+
+    path = re.findall(r'gs:\/\/[a-zA-Z-]*\/\s*([^\n\r]*)', data_path)
+    target_blob = bucket.blob(f'{path.pop()}api/progress.json')
+
+    with open('tmp.json', 'r') as f:
+        target_blob.upload_from_file(f)
 
 
 @component(base_image='tensorflow/tensorflow:latest-gpu', packages_to_install=['google-cloud-storage'])
@@ -166,7 +175,7 @@ def evaluate(data_path: str, bucket_name: str, model_name: str, trained_model: I
 
 
 @component(base_image='google/cloud-sdk', packages_to_install=["google-cloud-aiplatform"])
-def deploy(trained_model: InputPath(Model), evaluation_ok: bool, display_name: str) -> str:
+def deploy(data_path: str, bucket_name: str, trained_model: InputPath(Model), evaluation_ok: bool, display_name: str) -> str:
     from google.cloud import aiplatform
 
     if evaluation_ok:
@@ -184,12 +193,17 @@ def deploy(trained_model: InputPath(Model), evaluation_ok: bool, display_name: s
         print(uploaded_model.display_name)
         print(uploaded_model.resource_name)
 
-        endpoint = aiplatform.Endpoint('projects/1053517987499/locations/europe-west1/endpoints/8983317862185697280')
+        #endpoint = aiplatform.Endpoint.create(
+        #    display_name=display_name + "_endpoint",
+        #    project="ai-gilde",
+        #    location="europe-west1",
+        #)
+        endpoint = aiplatform.Endpoint('projects/1053517987499/locations/europe-west1/endpoints/4778064117942452224')
 
         print(endpoint.display_name)
         print(endpoint.resource_name)
 
-        machine_type = 'n1-standard-4'
+        machine_type = 'n1-standard-2'
         traffic_split = {"0": 100}
 
         uploaded_model.deploy(
@@ -203,7 +217,21 @@ def deploy(trained_model: InputPath(Model), evaluation_ok: bool, display_name: s
         print(uploaded_model.display_name)
         print(uploaded_model.resource_name)
 
-        print('ok9')
+        from google.cloud import storage
+        import json
+        import re
+
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+
+        with open('tmp.json', 'w', encoding='utf-8') as f:
+            json.dump({'progress': 'deploy_done'}, f, ensure_ascii=False, indent=4)
+
+        path = re.findall(r'gs:\/\/[a-zA-Z-]*\/\s*([^\n\r]*)', data_path)
+        target_blob = bucket.blob(f'{path.pop()}api/progress.json')
+
+        with open('tmp.json', 'r') as f:
+            target_blob.upload_from_file(f)
 
         return endpoint.resource_name
 
@@ -212,10 +240,9 @@ def deploy(trained_model: InputPath(Model), evaluation_ok: bool, display_name: s
 
 
 @component(base_image='google/cloud-sdk', packages_to_install=["google-cloud-aiplatform", "numpy"])
-def verify_endpoint(endpoint: str, test_data_file: InputPath(Dataset)):
+def verify_endpoint(data_path: str, bucket_name: str, endpoint: str, test_data_file: InputPath(Dataset)):
     from google.cloud import aiplatform
     import re
-    import pickle
 
     matches = re.search(r"projects/(.*\d+)/locations/(.*\d+)/endpoints/(.*\d+)", endpoint)
 
@@ -247,6 +274,22 @@ def verify_endpoint(endpoint: str, test_data_file: InputPath(Dataset)):
 
     print(response)
 
+    from google.cloud import storage
+    import json
+    import re
+
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+
+    with open('tmp.json', 'w', encoding='utf-8') as f:
+        json.dump({'progress': 'verify_endpoint_done'}, f, ensure_ascii=False, indent=4)
+
+    path = re.findall(r'gs:\/\/[a-zA-Z-]*\/\s*([^\n\r]*)', data_path)
+    target_blob = bucket.blob(f'{path.pop()}api/progress.json')
+
+    with open('tmp.json', 'r') as f:
+        target_blob.upload_from_file(f)
+
 
 # ## Build Pipeline
 
@@ -260,49 +303,49 @@ def pipeline_func(
         data_path: str,
         bucket_name: str,
         model_name: str,
-        image_number: int,
         words: dict,
 ):
     data_gen_container = data_gen(data_path=data_path, bucket_name=bucket_name, words=words)
 
     training_container = train(data_path=data_path,
+                               bucket_name=bucket_name,
                                train_data=data_gen_container.outputs['train_data'],
                                train_labels=data_gen_container.outputs['train_labels'])
 
     #evaluate_container = evaluate(data_path, bucket_name, model_name, training_container.outputs["trainedModel"],
     #                              data_gen_container.outputs["test_data"])
 
-    deploy_container = deploy(trained_model=training_container.outputs['trainedModel'],
+    deploy_container = deploy(data_path=data_path,
+                              bucket_name=bucket_name,
+                              trained_model=training_container.outputs['trainedModel'],
                               evaluation_ok=True,
                               display_name=model_name)
 
-    verify_endpoint_container = verify_endpoint(endpoint=deploy_container.output,
+    verify_endpoint_container = verify_endpoint(data_path=data_path,
+                                                bucket_name=bucket_name,
+                                                endpoint=deploy_container.output,
                                                 test_data_file=data_gen_container.outputs['test_data'])
 
 
 # ## Run Pipeline
 
-def run_pipeline(words: dict):
+def run_pipeline(words: dict, endpoint: str):
 
     arguments = {"data_path": DATA_PATH,
                  "bucket_name": GCS_BUCKET_NAME,
                  "model_name": MODEL_NAME,
-                 "image_number": IMAGE_NUMBER,
                  "words": words}
 
     # Deploy with Kubeflow
 
-    # Import Kubeflow SDK
-    import kfp
-
-    client = kfp.Client(host='https://23dd227a31eaadf-dot-europe-west1.pipelines.googleusercontent.com')
+    client = kfp.Client(host=endpoint)
 
     experiment_name = MODEL_NAME+'_kubeflow'
     run_name = pipeline_func.__name__ + ' run'
 
     # Compile pipeline to generate compressed YAML definition of the pipeline.
     kfp.compiler.Compiler(mode=kfp.dsl.PipelineExecutionMode.V2_COMPATIBLE).compile(pipeline_func,
-                                                                                '{}.yaml'.format(experiment_name))
+                                                                                    '{}.yaml'.format(experiment_name))
 
     run_result = client.create_run_from_pipeline_package('{}.yaml'.format(experiment_name),
                                                          experiment_name=experiment_name,
@@ -314,4 +357,4 @@ def run_pipeline(words: dict):
 
     # client.wait_for_run_completion(run_id=run_result.run_id, timeout=36000)
 
-# run_pipeline()
+# run_pipeline(json.loads('{ "good_words": ["test", "test2"], "bad_words": ["badtest", "xyz"] }'))
