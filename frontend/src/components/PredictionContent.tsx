@@ -10,7 +10,7 @@ export default function PredictionContent() {
             <Typography variant="h4" component="div" sx={{flexGrow: 1}}>
                 Prediction
             </Typography>
-            <Grid item xs={6}>
+            <Grid item xs={6} style={{marginTop: '1em', marginBottom: '1em'}}>
                 <TextField id="label" label="word1, word2, word3" variant="outlined" fullWidth/>
             </Grid>
             <Grid item>
