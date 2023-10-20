@@ -38,7 +38,7 @@ const runPipeline = async (goodWords: string[], badWords: string[]) => {
         .then((response) => response.text())
         .then((data) => {
             if (data == 'OK') {
-                alert('Pipeline started!');
+                document.getElementById('pipelineRun')!.innerText = 'Pipeline started!';
                 statusInterval();
             } else {
                 alert(data)
