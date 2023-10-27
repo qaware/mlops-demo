@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Button, Grid, Paper, TextField, Typography} from "@mui/material";
+import {Button, Collapse, Grid, Paper, TextField, Typography} from "@mui/material";
 import {triggerTraining} from "../service/BackendService";
 
 export default function TrainingContent() {
@@ -36,6 +36,8 @@ export default function TrainingContent() {
                     </Grid>
                 </Grid>
             </form>
+            <img id="pipelineProgress" alt="pipeline progress" src="/pipeline_progress/pipeline_started.png"
+                 style={{display: 'none', marginLeft: 'auto', marginRight: 'auto', width: '30%'}}/>
         </Paper>
     );
 }
