@@ -1,19 +1,38 @@
 import json
-
+import os
 from flask import Flask, request, Response
 
 from pipeline import run_pipeline
 
 from google.cloud import aiplatform, storage
 
+import re
+
 app = Flask(__name__)
+
+GCS_BUCKET_NAME = 'ai-gilde-kubeflowpipelines-default'
+DATA_PATH = 'gs://{}/demo/'.format(GCS_BUCKET_NAME)
 
 
 @app.route('/run/', methods=['POST'])
 def run():
     content_type = request.headers.get('Content-Type')
     if content_type == 'application/json':
-        run_pipeline(json.loads(request.data), 'https://f7187cd706a2d41-dot-europe-west1.pipelines.googleusercontent.com')
+        print(request.data)
+        run_pipeline(json.loads(request.data), os.environ['KUBEFLOW_URL'], os.environ['ENDPOINT_ID'])
+
+        client = storage.Client()
+        bucket = client.bucket(GCS_BUCKET_NAME)
+
+        with open('tmp.json', 'w', encoding='utf-8') as f:
+            json.dump({'progress': 'pipeline_started'}, f, ensure_ascii=False, indent=4)
+
+        path = re.findall(r'gs:\/\/[a-zA-Z-]*\/\s*([^\n\r]*)', DATA_PATH)
+        target_blob = bucket.blob(f'{path.pop()}api/progress.json')
+
+        with open('tmp.json', 'r') as f:
+            target_blob.upload_from_file(f)
+
         return "OK"
     else:
         return 'Content-Type not supported!'
@@ -38,7 +57,7 @@ def predict():
     if content_type == 'application/json':
         google_cloud_project = '1053517987499'
         google_cloud_region = 'europe-west1'
-        endpoint_id = '4778064117942452224'
+        endpoint_id = os.environ['ENDPOINT_ID']
 
         # The AI Platform services require regional API endpoints.
         client_options = {

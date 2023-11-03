@@ -29,6 +29,8 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
     import pickle
 
     import tensorflow as tf
+    from tensorflow.keras.preprocessing.text import Tokenizer
+    from tensorflow.keras.preprocessing.sequence import pad_sequences
 
     data_x = []
     label_x = []
@@ -40,19 +42,17 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
         data_x.append(item)
         label_x.append(0)
 
-    # one hot encoding
+    tokenizer = Tokenizer(num_words=len(data_x))  # Adjust the num_words based on your vocabulary size
+    tokenizer.fit_on_texts(data_x)
 
-    one_hot_x = [tf.keras.preprocessing.text.one_hot(d, 50) for d in data_x]
-
-    # padding
-
-    padded_x = tf.keras.preprocessing.sequence.pad_sequences(one_hot_x, maxlen=4, padding = 'post')
+    sequences = tokenizer.texts_to_sequences(data_x)
+    padded_sequences = pad_sequences(sequences, padding='post')
 
     with open(train_data, 'wb') as f:
-        pickle.dump(padded_x, f)
+        pickle.dump(padded_sequences, f)
 
     with open(test_data, 'wb') as f:
-        pickle.dump(padded_x, f)
+        pickle.dump(padded_sequences, f)
 
     with open(train_labels, 'wb') as f:
         pickle.dump(label_x, f)
@@ -73,6 +73,15 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
     with open('tmp.json', 'r') as f:
         target_blob.upload_from_file(f)
 
+    with open('tokenizer.pickle', 'wb') as f:
+        pickle.dump(tokenizer, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    path = re.findall(r'gs:\/\/[a-zA-Z-]*\/\s*([^\n\r]*)', data_path)
+    target_blob = bucket.blob(f'{path.pop()}/demo-model/1/tokenizer/tokenizer.pickle')
+
+    with open('tokenizer.pickle', 'rb') as f:
+        target_blob.upload_from_file(f)
+
 
 @component(base_image='tensorflow/tensorflow:latest-gpu', packages_to_install=['matplotlib'])
 def train(data_path: str, bucket_name: str, train_data: InputPath(Dataset), train_labels: InputPath(Artifact), trainedModel: OutputPath(Model)):
@@ -80,32 +89,30 @@ def train(data_path: str, bucket_name: str, train_data: InputPath(Dataset), trai
     import pickle
 
     import tensorflow as tf
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Embedding, GlobalAveragePooling1D, Dense
 
     import numpy as np
 
     with open(train_data, 'rb') as f:
-        padded_x = pickle.load(f)
+        padded_sequences = pickle.load(f)
 
     with open(train_labels, 'rb') as f:
-        label_x = pickle.load(f)
+        labels = pickle.load(f)
 
-    # Architecting our Model
+    # Define the model
+    model = Sequential()
+    model.add(Embedding(input_dim=len(labels), output_dim=16, input_length=len(padded_sequences[0])))  # Adjust input_dim and output_dim
+    model.add(GlobalAveragePooling1D())
+    model.add(Dense(1, activation='sigmoid'))  # Single output neuron with sigmoid for binary classification
 
-    model = tf.keras.models.Sequential([
-        tf.keras.layers.Embedding(50, 8, input_length=4),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(1, activation='sigmoid')
-    ])
+    # Compile the model
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-    # specifying training params
+    labels = np.array(labels)
 
-    model.compile(optimizer='adam', loss='binary_crossentropy',
-                  metrics=['accuracy'])
-
-    # Run a training job with specified number of epochs
-
-    history = model.fit(np.asarray(padded_x), np.asarray(label_x), epochs=1000,
-                        batch_size=2, verbose=0)
+    # Train the model
+    history = model.fit(padded_sequences, labels, epochs=10)
 
     import matplotlib.pyplot as plt
 
@@ -175,7 +182,7 @@ def evaluate(data_path: str, bucket_name: str, model_name: str, trained_model: I
 
 
 @component(base_image='google/cloud-sdk', packages_to_install=["google-cloud-aiplatform"])
-def deploy(data_path: str, bucket_name: str, trained_model: InputPath(Model), evaluation_ok: bool, display_name: str) -> str:
+def deploy(data_path: str, bucket_name: str, trained_model: InputPath(Model), evaluation_ok: bool, endpoint: str, display_name: str) -> str:
     from google.cloud import aiplatform
 
     if evaluation_ok:
@@ -193,12 +200,12 @@ def deploy(data_path: str, bucket_name: str, trained_model: InputPath(Model), ev
         print(uploaded_model.display_name)
         print(uploaded_model.resource_name)
 
-        #endpoint = aiplatform.Endpoint.create(
-        #    display_name=display_name + "_endpoint",
-        #    project="ai-gilde",
-        #    location="europe-west1",
-        #)
-        endpoint = aiplatform.Endpoint('projects/1053517987499/locations/europe-west1/endpoints/4778064117942452224')
+        endpoint = aiplatform.Endpoint.create(
+            display_name=display_name + "_endpoint",
+            project="ai-gilde",
+            location="europe-west1",
+        )
+        #endpoint = aiplatform.Endpoint('projects/1053517987499/locations/europe-west1/endpoints/'+endpoint)
 
         print(endpoint.display_name)
         print(endpoint.resource_name)
@@ -303,6 +310,7 @@ def pipeline_func(
         data_path: str,
         bucket_name: str,
         model_name: str,
+        endpoint: str,
         words: dict,
 ):
     data_gen_container = data_gen(data_path=data_path, bucket_name=bucket_name, words=words)
@@ -319,6 +327,7 @@ def pipeline_func(
                               bucket_name=bucket_name,
                               trained_model=training_container.outputs['trainedModel'],
                               evaluation_ok=True,
+                              endpoint=endpoint,
                               display_name=model_name)
 
     verify_endpoint_container = verify_endpoint(data_path=data_path,
@@ -329,16 +338,17 @@ def pipeline_func(
 
 # ## Run Pipeline
 
-def run_pipeline(words: dict, endpoint: str):
+def run_pipeline(words: dict, kubeflow_url: str, endpoint: str):
 
     arguments = {"data_path": DATA_PATH,
                  "bucket_name": GCS_BUCKET_NAME,
                  "model_name": MODEL_NAME,
+                 "endpoint": endpoint,
                  "words": words}
 
     # Deploy with Kubeflow
 
-    client = kfp.Client(host=endpoint)
+    client = kfp.Client(host=kubeflow_url)
 
     experiment_name = MODEL_NAME+'_kubeflow'
     run_name = pipeline_func.__name__ + ' run'
