@@ -18,7 +18,7 @@ def predict():
     modelId = os.environ['AIP_DEPLOYED_MODEL_ID']
     storageUri = os.environ['AIP_STORAGE_URI']
 
-    # print('storage URI:', storageUri)
+    print('storage URI:', storageUri)
     # print('model ID:', modelId)
 
     model = tf.keras.models.load_model(storageUri)
@@ -27,11 +27,13 @@ def predict():
 
     storage_client = storage.Client()
 
-    bucket_name = storageUri.split("/")[2]
+    tokenizer_uri = storageUri + "/tokenizer/tokenizer.pickle"
+
+    bucket_name = tokenizer_uri.split("/")[2]
 
     # extract file name by splitting string to remove gs:// prefix and bucket name
     # rejoin to rebuild the file path
-    object_name = "/".join(storageUri.split("/")[3:]).join("/tokenizer/tokenizer.pickle")
+    object_name = "/".join(tokenizer_uri.split("/")[3:])
 
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(object_name)
@@ -73,6 +75,6 @@ if __name__ == '__main__':
     print("Health route: ", os.environ['AIP_HEALTH_ROUTE'])
     print("Predict route: ", os.environ['AIP_PREDICT_ROUTE'])
     print("Port: ", os.environ['AIP_HTTP_PORT'])
-    print('storage URI:', os.environ['AIP_STORAGE_URI'] + "/model")
+    print('storage URI:', os.environ['AIP_STORAGE_URI'])
     app.run(host='0.0.0.0', port=os.environ['AIP_HTTP_PORT'])
 

@@ -77,7 +77,7 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
         pickle.dump(tokenizer, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     path = re.findall(r'gs:\/\/[a-zA-Z-]*\/\s*([^\n\r]*)', data_path)
-    target_blob = bucket.blob(f'{path.pop()}/demo-model/1/tokenizer/tokenizer.pickle')
+    target_blob = bucket.blob(f'{path.pop()}demo-model/1/tokenizer/tokenizer.pickle')
 
     with open('tokenizer.pickle', 'rb') as f:
         target_blob.upload_from_file(f)
@@ -192,7 +192,7 @@ def deploy(data_path: str, bucket_name: str, trained_model: InputPath(Model), ev
             # if new version of existing model, use model ID. Can be deleted if not.
             parent_model="4349940678365544448",
             serving_container_image_uri="europe-west1-docker.pkg.dev/ai-gilde/demo/serving-container:latest",
-            artifact_uri=trained_model,
+            artifact_uri=f'{data_path}demo-model/1',
         )
 
         uploaded_model.wait()
@@ -200,12 +200,12 @@ def deploy(data_path: str, bucket_name: str, trained_model: InputPath(Model), ev
         print(uploaded_model.display_name)
         print(uploaded_model.resource_name)
 
-        endpoint = aiplatform.Endpoint.create(
-            display_name=display_name + "_endpoint",
-            project="ai-gilde",
-            location="europe-west1",
-        )
-        #endpoint = aiplatform.Endpoint('projects/1053517987499/locations/europe-west1/endpoints/'+endpoint)
+        #endpoint = aiplatform.Endpoint.create(
+        #    display_name=display_name + "_endpoint",
+        #    project="ai-gilde",
+        #    location="europe-west1",
+        #)
+        endpoint = aiplatform.Endpoint('projects/1053517987499/locations/europe-west1/endpoints/'+endpoint)
 
         print(endpoint.display_name)
         print(endpoint.resource_name)
