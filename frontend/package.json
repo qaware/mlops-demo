@@ -1,6 +1,6 @@
 {
-  "name": "material-cra-ts",
-  "version": "5.0.0",
+  "name": "mlops-demo",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "latest",
