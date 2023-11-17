@@ -81,27 +81,14 @@ export const predict = async (words: string[]) => {
             const gW = [];
             const bW = [];
 
-            //document.getElementById('predictionContent')!.hidden = false;
-            //document.getElementById('gWords')!.innerText = "";
-            //document.getElementById('bWords')!.innerText = "";
             let weight = JSON.parse(data);
             // alert(weight)
             words.reverse();
             for (const element in weight) {
                 if (weight[element] == 'positive') {
                     gW.push(words.pop());
-
-                    //if (document.getElementById('gWords')!.innerText.length > 0) {
-                    //    document.getElementById('gWords')!.innerText = document.getElementById('gWords')!.innerText + ", ";
-                    //}
-                    //document.getElementById('gWords')!.innerText = document.getElementById('gWords')!.innerText+ words.pop();
                 } else if (weight[element] == 'negative') {
                     bW.push(words.pop());
-
-                    //if (document.getElementById('bWords')!.innerText.length > 0) {
-                    //    document.getElementById('bWords')!.innerText = document.getElementById('bWords')!.innerText + ", ";
-                    //}
-                    //document.getElementById('bWords')!.innerText = document.getElementById('bWords')!.innerText + words.pop();
                 } else {
                     alert('Unknown Error!')
                 }
