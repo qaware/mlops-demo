@@ -1,4 +1,5 @@
 import * as React from "react";
+import {stopInterval} from "../App";
 
 export async function getStatus() {
     await fetch('http://localhost:8080/status/', {
@@ -8,17 +9,29 @@ export async function getStatus() {
         .then((data) => {
             console.log(data)
             let progress = JSON.parse(data).progress as string
+            document.getElementById('pipelineProgress')!.style.display = 'block';
             (document.getElementById('pipelineProgress')! as HTMLImageElement).src = `/pipeline_progress/${progress}.png`;
+            if (progress == "verify_endpoint_done") {
+                stopInterval();
+                resetStatus();
+            }
         })
         .catch((err) => {
             console.log(err.message);
         });
 }
 
-export function statusInterval() {
-    setInterval(() => {
-        getStatus()
-    }, 10000);
+export async function resetStatus() {
+    await fetch('http://localhost:8080/reset-status/', {
+        method: 'GET',
+    })
+        .then((response) => response.text())
+        .then((data) => {
+            console.log(data)
+        })
+        .catch((err) => {
+            console.log(err.message);
+        });
 }
 
 export function triggerTraining(event: React.ChangeEvent<any>): Promise<void> {
@@ -42,8 +55,7 @@ const runPipeline = async (goodWords: string[], badWords: string[]) => {
         .then((data) => {
             if (data == 'OK') {
                 document.getElementById('pipelineRun')!.innerText = 'Pipeline started!';
-                document.getElementById('pipelineProgress')!.style.display = 'block';
-                statusInterval();
+                // statusInterval();
             } else {
                 document.getElementById('pipelineRun')!.innerText = 'Error while starting the pipeline!';
                 console.log(data)

@@ -43,11 +43,29 @@ def run():
 def status():
     storage_client = storage.Client()
 
-    bucket = storage_client.bucket('ai-gilde-kubeflowpipelines-default')
+    bucket = storage_client.bucket(GCS_BUCKET_NAME)
 
     blob = bucket.blob('demo/api/progress.json')
 
     return Response(blob.download_as_string(), mimetype='application/json')
+
+
+# Needs Permission 'Storage Object User'
+@app.route('/reset-status/', methods=['GET'])
+def reset_status():
+    storage_client = storage.Client()
+
+    bucket = storage_client.bucket(GCS_BUCKET_NAME)
+
+    with open('tmp.json', 'w', encoding='utf-8') as f:
+        json.dump({'progress': 'reset'}, f, ensure_ascii=False, indent=4)
+
+    target_blob = bucket.blob(f'demo/api/progress.json')
+
+    with open('tmp.json', 'r') as f:
+        target_blob.upload_from_file(f)
+
+    return "OK"
 
 
 # Needs Permission 'Vertex AI User'
