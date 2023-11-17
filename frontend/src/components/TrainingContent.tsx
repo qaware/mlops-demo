@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Collapse, Grid, Paper, TextField, Typography } from "@mui/material";
+import { Button, Grid, Paper, TextField, Typography } from "@mui/material";
 import { triggerTraining } from "../service/BackendService";
 
 export default function TrainingContent() {
@@ -35,8 +35,8 @@ export default function TrainingContent() {
                     </Grid>
                     <Grid item xs={3} marginLeft="auto" >
                         <Grid container rowSpacing={1} height={450} columnSpacing={{xs: 1, sm: 2, md: 3}} sx={{ backgroundColor: 'lightgray' }}>
-                                <img id="pipelineProgress" alt="pipeline progress" src="/pipeline_progress/pipeline_started.png"
-                                     style={{display: 'none', marginLeft: 'auto', marginRight: 'auto', width: '100%'}}/>
+                                <img id="pipelineProgress" alt="pipeline progress" src="/pipeline_progress/reset.png"
+                                     style={{display: 'block', marginLeft: 'auto', marginRight: 'auto', width: '100%'}}/>
                         </Grid>
 
                     </Grid>

@@ -94,12 +94,12 @@ const predict = async (words: string[]) => {
                     if (document.getElementById('gWords')!.innerText.length > 0) {
                         document.getElementById('gWords')!.innerText = document.getElementById('gWords')!.innerText + ", ";
                     }
-                    document.getElementById('gWords')!.innerText = document.getElementById('gWords')!.innerText+ words.pop() as string;
+                    document.getElementById('gWords')!.innerText = document.getElementById('gWords')!.innerText+ words.pop();
                 } else if (weight[element] == 'negative') {
                     if (document.getElementById('bWords')!.innerText.length > 0) {
                         document.getElementById('bWords')!.innerText = document.getElementById('bWords')!.innerText + ", ";
                     }
-                    document.getElementById('bWords')!.innerText = document.getElementById('bWords')!.innerText + words.pop() as string;
+                    document.getElementById('bWords')!.innerText = document.getElementById('bWords')!.innerText + words.pop();
                 } else {
                     alert('Unknown Error!')
                 }
