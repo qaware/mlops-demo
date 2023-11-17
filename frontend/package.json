@@ -10,6 +10,7 @@
     "@types/react-dom": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "react-native": "^0.72.7",
     "react-scripts": "latest",
     "typescript": "latest"
   },

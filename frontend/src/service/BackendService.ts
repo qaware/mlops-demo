@@ -66,13 +66,8 @@ const runPipeline = async (goodWords: string[], badWords: string[]) => {
         });
 };
 
-export function triggerPrediction(event: React.ChangeEvent<any>): Promise<void> {
-    event.preventDefault();
-    return predict(event.target[0].value.replace(/\s+/g, '').split(','));
-}
-
-const predict = async (words: string[]) => {
-    await fetch('http://localhost:8080/predict/', {
+export const predict = async (words: string[]) => {
+    return fetch('http://localhost:8080/predict/', {
         method: 'POST',
         body: JSON.stringify({
             instances: words,
@@ -83,27 +78,45 @@ const predict = async (words: string[]) => {
     })
         .then((response) => response.text())
         .then((data) => {
-            document.getElementById('predictionContent')!.hidden = false;
-            document.getElementById('gWords')!.innerText = "";
-            document.getElementById('bWords')!.innerText = "";
+            const gW = [];
+            const bW = [];
+
+            //document.getElementById('predictionContent')!.hidden = false;
+            //document.getElementById('gWords')!.innerText = "";
+            //document.getElementById('bWords')!.innerText = "";
             let weight = JSON.parse(data);
             // alert(weight)
             words.reverse();
             for (const element in weight) {
                 if (weight[element] == 'positive') {
-                    if (document.getElementById('gWords')!.innerText.length > 0) {
-                        document.getElementById('gWords')!.innerText = document.getElementById('gWords')!.innerText + ", ";
-                    }
-                    document.getElementById('gWords')!.innerText = document.getElementById('gWords')!.innerText+ words.pop();
+                    gW.push(words.pop());
+
+                    //if (document.getElementById('gWords')!.innerText.length > 0) {
+                    //    document.getElementById('gWords')!.innerText = document.getElementById('gWords')!.innerText + ", ";
+                    //}
+                    //document.getElementById('gWords')!.innerText = document.getElementById('gWords')!.innerText+ words.pop();
                 } else if (weight[element] == 'negative') {
-                    if (document.getElementById('bWords')!.innerText.length > 0) {
-                        document.getElementById('bWords')!.innerText = document.getElementById('bWords')!.innerText + ", ";
-                    }
-                    document.getElementById('bWords')!.innerText = document.getElementById('bWords')!.innerText + words.pop();
+                    bW.push(words.pop());
+
+                    //if (document.getElementById('bWords')!.innerText.length > 0) {
+                    //    document.getElementById('bWords')!.innerText = document.getElementById('bWords')!.innerText + ", ";
+                    //}
+                    //document.getElementById('bWords')!.innerText = document.getElementById('bWords')!.innerText + words.pop();
                 } else {
                     alert('Unknown Error!')
                 }
             }
+            let rows: string[][] = [];
+            let size = gW.length > bW.length ? gW.length : bW.length;
+            for (let i = 0; i < size; i++) {
+                let good = gW.length > 0 ? gW.pop() as string : "";
+                let bad = bW.length > 0 ? bW.pop() as string : "";
+
+                rows.push([good, bad])
+            }
+            console.log(rows)
+
+            return rows;
         })
         .catch((err) => {
             console.log(err.message);
