@@ -12,6 +12,7 @@ export default function Footer() {
             width: '100%',
             position: 'fixed',
             bottom: 0,
+            zIndex: 5,
         }} component="footer" square variant="outlined">
             <Container maxWidth="lg">
                 <Box

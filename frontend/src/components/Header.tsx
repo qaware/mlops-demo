@@ -17,7 +17,7 @@ export default function Header() {
                         sx={{mr: 2}}
                     >
                     </IconButton>
-                    <Typography variant="h3" component="div" sx={{flexGrow: 1}}>
+                    <Typography variant="h4" component="div" sx={{flexGrow: 1}}>
                         MLOps Demo Application
                     </Typography>
                     <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
