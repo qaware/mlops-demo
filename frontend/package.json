@@ -3,16 +3,21 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@emotion/react": "latest",
-    "@emotion/styled": "latest",
-    "@mui/material": "latest",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.19",
+    "@mui/material": "^5.14.20",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "react": "latest",
     "react-dom": "latest",
     "react-native": "^0.72.7",
     "react-scripts": "latest",
+    "react-syntax-highlighter": "^15.5.0",
     "typescript": "latest"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "latest"
   },
   "scripts": {
     "start": "react-scripts start",
