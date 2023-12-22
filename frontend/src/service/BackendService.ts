@@ -11,6 +11,9 @@ export async function getStatus() {
             let progress = JSON.parse(data).progress as string
             document.getElementById('pipelineProgress')!.style.display = 'block';
             (document.getElementById('pipelineProgress')! as HTMLImageElement).src = `/pipeline_progress/${progress}.png`;
+
+            setArrows(progress);
+
             if (progress == "verify_endpoint_done") {
                 stopInterval();
                 resetStatus();
@@ -19,6 +22,29 @@ export async function getStatus() {
         .catch((err) => {
             console.log(err.message);
         });
+}
+
+function resetArrows() {
+    document.getElementById("stepOneTitle")!.style.display = 'none';
+    document.getElementById("stepTwoTitle")!.style.display = 'none';
+    document.getElementById("stepThreeTitle")!.style.display = 'none';
+    document.getElementById("stepFourTitle")!.style.display = 'none';
+}
+
+function setArrows(progress: string) {
+    resetArrows();
+    if (progress == "pipeline_started") {
+        document.getElementById("stepOneTitle")!.style.display = 'block';
+    }
+    if (progress == "data_gen_done") {
+        document.getElementById("stepTwoTitle")!.style.display = 'block';
+    }
+    if (progress == "train_done") {
+        document.getElementById("stepThreeTitle")!.style.display = 'block';
+    }
+    if (progress == "deploy_done") {
+        document.getElementById("stepFourTitle")!.style.display = 'block';
+    }
 }
 
 export async function resetStatus() {
