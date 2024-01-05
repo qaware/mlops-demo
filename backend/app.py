@@ -1,5 +1,7 @@
 import json
 import os
+
+import flask
 from flask import Flask, request, Response
 
 from pipeline import run_pipeline
@@ -104,6 +106,17 @@ def predict():
     else:
         return 'Content-Type not supported!'
 
+@app.route('/plot/', methods=['GET'])
+def getPlot():
+    storage_client = storage.Client()
+
+    bucket = storage_client.bucket(GCS_BUCKET_NAME)
+    blob = bucket.blob(f'demo/plot/plot.html')
+
+    blob.download_to_filename('plot.html')
+
+    with open('plot.html', 'r') as file:
+        return file.read()
 
 @app.route('/health/')
 def health():

@@ -135,7 +135,7 @@ def plot(data_path: str, bucket_name: str, model_name: str, trained_model_path: 
     bucket = client.bucket(bucket_name)
 
     path = re.findall(r'gs://[a-zA-Z-]*/\s*([^\n\r]*)', data_path)
-    target_blob = bucket.blob(f'{path.pop()}demo-model/1/plot/plot.html')
+    target_blob = bucket.blob(f'{path.pop()}plot/plot.html')
 
     with open('plot.html', 'r', encoding='latin-1') as f:
         target_blob.upload_from_file(f)
