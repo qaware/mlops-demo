@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import TrainingContent from './TrainingContent';
 import PredictionContent from './PredictionContent';
 import DocumentationContent from './DocumentationContent';
+import PlotContent from './PlotContent';
 
 export default function Content() {
     return (
@@ -13,6 +14,7 @@ export default function Content() {
                 INSERT AN INITIAL EXPLAINING TEXT HERE
             </Box>
             <TrainingContent/>
+            <PlotContent/>
             <PredictionContent/>
             <DocumentationContent/>
         </Container>
