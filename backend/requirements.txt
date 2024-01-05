@@ -4,3 +4,4 @@ tensorflow
 kfp==1.8.22
 google-cloud-aiplatform
 numpy
+plotly
