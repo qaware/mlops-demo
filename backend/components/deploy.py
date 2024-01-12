@@ -21,11 +21,6 @@ def deploy(data_path: str, bucket_name: str, trained_model: InputPath(Model), ev
         print(uploaded_model.display_name)
         print(uploaded_model.resource_name)
 
-        # endpoint = aiplatform.Endpoint.create(
-        #    display_name=display_name + "_endpoint",
-        #    project="ai-gilde",
-        #    location="europe-west1",
-        # )
         endpoint = aiplatform.Endpoint('projects/1053517987499/locations/europe-west1/endpoints/' + endpoint)
 
         print(endpoint.display_name)
@@ -55,7 +50,7 @@ def deploy(data_path: str, bucket_name: str, trained_model: InputPath(Model), ev
         with open('tmp.json', 'w', encoding='utf-8') as f:
             json.dump({'progress': 'deploy_done'}, f, ensure_ascii=False, indent=4)
 
-        path = re.findall(r'gs:\/\/[a-zA-Z-]*\/\s*([^\n\r]*)', data_path)
+        path = re.findall(r'gs://[a-zA-Z-]*/\s*([^\n\r]*)', data_path)
         target_blob = bucket.blob(f'{path.pop()}api/progress.json')
 
         with open('tmp.json', 'r') as f:

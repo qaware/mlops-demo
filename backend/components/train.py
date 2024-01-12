@@ -40,8 +40,8 @@ def train(data_path: str, bucket_name: str, train_data: InputPath(Dataset), trai
     # Save the model to the designated
     model.save(trained_model)
 
-    modelPath = f'{data_path}demo-model/1'
-    model.save(modelPath)
+    model_path = f'{data_path}demo-model/1'
+    model.save(model_path)
 
     from google.cloud import storage
     import json
@@ -53,7 +53,7 @@ def train(data_path: str, bucket_name: str, train_data: InputPath(Dataset), trai
     with open('tmp.json', 'w', encoding='utf-8') as f:
         json.dump({'progress': 'train_done'}, f, ensure_ascii=False, indent=4)
 
-    path = re.findall(r'gs:\/\/[a-zA-Z-]*\/\s*([^\n\r]*)', data_path)
+    path = re.findall(r'gs://[a-zA-Z-]*/\s*([^\n\r]*)', data_path)
     target_blob = bucket.blob(f'{path.pop()}api/progress.json')
 
     with open('tmp.json', 'r') as f:

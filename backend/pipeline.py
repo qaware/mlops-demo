@@ -61,9 +61,9 @@ def pipeline_func(
                               display_name=model_name)
 
     verify_endpoint(data_path=data_path,
-                                                bucket_name=bucket_name,
-                                                endpoint=deploy_container.output,
-                                                test_data_file=data_gen_container.outputs['test_data'])
+                    bucket_name=bucket_name,
+                    endpoint=deploy_container.output,
+                    test_data_file=data_gen_container.outputs['test_data'])
 
 
 # ## Run Pipeline

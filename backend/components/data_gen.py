@@ -3,7 +3,8 @@ from kfp.v2.dsl import OutputPath, component, Dataset, Artifact
 
 @component(base_image='tensorflow/tensorflow:latest-gpu')
 def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPath(Dataset),
-             test_data: OutputPath(Dataset), train_labels: OutputPath(Artifact), padded_sequences_path: OutputPath(Dataset)):
+             test_data: OutputPath(Dataset), train_labels: OutputPath(Artifact),
+             padded_sequences_path: OutputPath(Dataset)):
     # func_to_container_op requires packages to be imported inside the function.
     import pickle
 
@@ -48,8 +49,8 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
     with open('tmp.json', 'w', encoding='utf-8') as f:
         json.dump({'progress': 'data_gen_done'}, f, ensure_ascii=False, indent=4)
 
-    path = re.findall(r'gs:\/\/[a-zA-Z-]*\/\s*([^\n\r]*)', data_path)
-    target_blob = bucket.blob(f'{path.pop()}api/progress.json')
+    path = re.findall(r'gs://[a-zA-Z-]*/\s*([^\n\r]*)', data_path).pop()
+    target_blob = bucket.blob(f'{path}api/progress.json')
 
     with open('tmp.json', 'r') as f:
         target_blob.upload_from_file(f)
@@ -57,8 +58,7 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
     with open('tokenizer.pickle', 'wb') as f:
         pickle.dump(tokenizer, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-    path = re.findall(r'gs:\/\/[a-zA-Z-]*\/\s*([^\n\r]*)', data_path)
-    target_blob = bucket.blob(f'{path.pop()}demo-model/1/tokenizer/tokenizer.pickle')
+    target_blob = bucket.blob(f'{path}demo-model/1/tokenizer/tokenizer.pickle')
 
     with open('tokenizer.pickle', 'rb') as f:
         target_blob.upload_from_file(f)

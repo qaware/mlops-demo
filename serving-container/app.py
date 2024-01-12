@@ -1,33 +1,29 @@
 import os
-from flask import Flask, jsonify,request
+import pickle
 
 import tensorflow as tf
-from tensorflow.keras.preprocessing.text import Tokenizer
+from flask import Flask, jsonify, request
+from google.cloud import storage
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-from google.cloud import storage
-
-import pickle
-import json
-
 app = Flask(__name__)
+
 
 @app.route(os.environ['AIP_PREDICT_ROUTE'], methods=['POST'])
 def predict():
     req = request.json.get('instances')
-    modelId = os.environ['AIP_DEPLOYED_MODEL_ID']
-    storageUri = os.environ['AIP_STORAGE_URI']
+    storage_uri = os.environ['AIP_STORAGE_URI']
 
-    print('storage URI:', storageUri)
+    print('storage URI:', storage_uri)
     # print('model ID:', modelId)
 
-    model = tf.keras.models.load_model(storageUri)
+    model = tf.keras.models.load_model(storage_uri)
 
     # Retrieve the tokenizer
 
     storage_client = storage.Client()
 
-    tokenizer_uri = storageUri + "/tokenizer/tokenizer.pickle"
+    tokenizer_uri = storage_uri + "/tokenizer/tokenizer.pickle"
 
     bucket_name = tokenizer_uri.split("/")[2]
 
@@ -68,8 +64,10 @@ def health():
     # print("HEALTH PING")
     return "OK"
 
+
 def extract_gc_object_name(uri):
     return "/".join(uri.split("/")[3:])
+
 
 if __name__ == '__main__':
     print("Health route: ", os.environ['AIP_HEALTH_ROUTE'])
@@ -77,4 +75,3 @@ if __name__ == '__main__':
     print("Port: ", os.environ['AIP_HTTP_PORT'])
     print('storage URI:', os.environ['AIP_STORAGE_URI'])
     app.run(host='0.0.0.0', port=os.environ['AIP_HTTP_PORT'])
-
