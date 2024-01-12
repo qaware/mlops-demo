@@ -27,7 +27,7 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
     padded_sequences = pad_sequences(sequences, padding='post')
 
     with open(train_data, 'wb') as f:
-        pickle.dump(padded_sequences, f)
+        pickle.dump(data_x, f)
 
     with open(test_data, 'wb') as f:
         pickle.dump(padded_sequences, f)

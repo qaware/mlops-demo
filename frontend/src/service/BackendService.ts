@@ -14,6 +14,10 @@ export async function getStatus() {
 
             setArrows(progress);
 
+            if (progress == "deploy_done") {
+                (document.getElementById('plot2')! as HTMLIFrameElement).contentWindow!.location.reload();
+            }
+
             if (progress == "verify_endpoint_done") {
                 stopInterval();
                 resetStatus();
