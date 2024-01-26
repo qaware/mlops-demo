@@ -21,7 +21,7 @@ export default function PredictionContent() {
         event.preventDefault(); // Prevent default form submission behavior
 
         try {
-            const result = await predict(event.target[0].value.replace(/\s+/g, '').split(','));
+            const result = await predict(event.target[0].value.replace(/(?<=,|^)\s+|\s+(?=,|$)/g, '').split(','));
             setRows(_ => { return result as string[][] }); // Update the state with the result
         } catch (error) {
             console.error('Error occurred:', error);

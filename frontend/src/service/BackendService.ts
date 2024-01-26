@@ -67,7 +67,7 @@ export async function resetStatus() {
 export function triggerTraining(event: React.ChangeEvent<any>): Promise<void> {
     event.preventDefault();
 
-    return runPipeline(event.target.goodWords.value.replace(/\s+/g, '').split(','),event.target.badWords.value.replace(/\s+/g, '').split(','));
+    return runPipeline(event.target.goodWords.value.replace(/(?<=,|^)\s+|\s+(?=,|$)/g, '').split(','),event.target.badWords.value.replace(/(?<=,|^)\s+|\s+(?=,|$)/g, '').split(','));
 }
 
 const runPipeline = async (goodWords: string[], badWords: string[]) => {
