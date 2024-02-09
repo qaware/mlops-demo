@@ -13,11 +13,11 @@ export default function TrainingContent() {
                 <Grid container direction="row" marginTop={2} alignItems="flex-start">
                     <Grid container xs={8} direction="row" rowSpacing={2}>
                         <Grid item xs={13}>
-                            <TextField id="goodWords" label="GoodWord1, GoodWord2, GoodWord3" variant="outlined"
+                            <TextField id="goodWords" label="Good Sentence 1, Good Sentence 2, Good Sentence 3" variant="outlined"
                                        fullWidth/>
                         </Grid>
                         <Grid item xs={13}>
-                            <TextField id="badWords" label="BadWord1, BadWord2, BadWord3" variant="outlined" fullWidth/>
+                            <TextField id="badWords" label="Bad Sentence 1, Bad Sentence , Bad Sentence 3" variant="outlined" fullWidth/>
                         </Grid>
                         <Grid item xs={13} >
                             <Grid container justifyContent="flex-end">
