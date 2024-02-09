@@ -2,7 +2,7 @@ from kfp.v2.dsl import OutputPath, InputPath, component, Dataset, Artifact, Mode
 
 
 @component(base_image='tensorflow/tensorflow:latest-gpu', packages_to_install=['matplotlib'])
-def train(data_path: str, bucket_name: str, train_data: InputPath(Dataset), train_labels: InputPath(Artifact),
+def train(data_path: str, bucket_name: str, train_data: InputPath(Dataset), train_labels: InputPath(Artifact), tokenizer_path: InputPath(Artifact),
           trained_model: OutputPath(Model)):
     # func_to_container_op requires packages to be imported inside the function.
     import pickle
@@ -18,9 +18,12 @@ def train(data_path: str, bucket_name: str, train_data: InputPath(Dataset), trai
     with open(train_labels, 'rb') as f:
         labels = pickle.load(f)
 
+    with open(tokenizer_path, 'rb') as f:
+        tokenizer = pickle.load(f)
+
     # Define the model
     model = Sequential()
-    model.add(Embedding(input_dim=len(labels), output_dim=16,
+    model.add(Embedding(input_dim=len(tokenizer.word_index)+1, output_dim=16,
                         input_length=len(padded_sequences[0])))  # Adjust input_dim and output_dim
     model.add(GlobalAveragePooling1D())
     model.add(Dense(1, activation='sigmoid'))  # Single output neuron with sigmoid for binary classification

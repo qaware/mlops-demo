@@ -24,26 +24,35 @@ def predict():
     storage_client = storage.Client()
 
     tokenizer_uri = storage_uri + "/tokenizer/tokenizer.pickle"
+    max_len_uri = storage_uri + "/tokenizer/max_len.pickle"
 
     bucket_name = tokenizer_uri.split("/")[2]
 
     # extract file name by splitting string to remove gs:// prefix and bucket name
     # rejoin to rebuild the file path
     object_name = "/".join(tokenizer_uri.split("/")[3:])
+    object_name_max_len = "/".join(max_len_uri.split("/")[3:])
 
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(object_name)
     blob.download_to_filename('tokenizer.pickle')
 
+    blob2 = bucket.blob(object_name_max_len)
+    blob2.download_to_filename('max_len.pickle')
+
     with open('tokenizer.pickle', 'rb') as handle:
         tokenizer = pickle.load(handle)
+
+    with open('max_len.pickle', 'rb') as handle:
+        max_len = pickle.load(handle)
 
     # Prediction
 
     prediction = []
 
     new_sequences = tokenizer.texts_to_sequences(req)
-    new_padded_sequences = pad_sequences(new_sequences, padding='post')
+
+    new_padded_sequences = pad_sequences(new_sequences, padding='post', maxlen=max_len)
     predictions = model.predict(new_padded_sequences)
 
     # Convert predictions to a list (if they are not already)

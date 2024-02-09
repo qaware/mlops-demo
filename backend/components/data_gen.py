@@ -3,7 +3,7 @@ from kfp.v2.dsl import OutputPath, component, Dataset, Artifact
 
 @component(base_image='tensorflow/tensorflow:latest-gpu')
 def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPath(Dataset),
-             test_data: OutputPath(Dataset), train_labels: OutputPath(Artifact),
+             test_data: OutputPath(Dataset), train_labels: OutputPath(Artifact), tokenizer_path: OutputPath(Artifact),
              padded_sequences_path: OutputPath(Dataset)):
     # func_to_container_op requires packages to be imported inside the function.
     import pickle
@@ -134,7 +134,7 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
         data_x.append(item)
         label_x.append(0)
 
-    tokenizer = Tokenizer(num_words=len(data_x), lower=False)  # Adjust the num_words based on your vocabulary size
+    tokenizer = Tokenizer(num_words=None, lower=False)  # Adjust the num_words based on your vocabulary size
     tokenizer.fit_on_texts(data_x)
 
     sequences = tokenizer.texts_to_sequences(data_x)
@@ -174,4 +174,17 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
     target_blob = bucket.blob(f'{path}demo-model/1/tokenizer/tokenizer.pickle')
 
     with open('tokenizer.pickle', 'rb') as f:
+        target_blob.upload_from_file(f)
+
+    with open(tokenizer_path, 'wb') as f:
+        pickle.dump(tokenizer, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    max_len = max(len(sequence) for sequence in sequences)
+
+    with open('max_len.pickle', 'wb') as f:
+        pickle.dump(max_len, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    target_blob = bucket.blob(f'{path}demo-model/1/tokenizer/max_len.pickle')
+
+    with open('max_len.pickle', 'rb') as f:
         target_blob.upload_from_file(f)
