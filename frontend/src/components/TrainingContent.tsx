@@ -17,7 +17,7 @@ export default function TrainingContent() {
                                        fullWidth/>
                         </Grid>
                         <Grid item xs={13}>
-                            <TextField id="badWords" label="Bad Sentence 1, Bad Sentence , Bad Sentence 3" variant="outlined" fullWidth/>
+                            <TextField id="badWords" label="Bad Sentence 1, Bad Sentence 2, Bad Sentence 3" variant="outlined" fullWidth/>
                         </Grid>
                         <Grid item xs={13} >
                             <Grid container justifyContent="flex-end">

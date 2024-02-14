@@ -1,0 +1,27 @@
+@font-face {
+    font-family: 'SpartanMB-Medium';
+    src: url('../public/SpartanMB-Medium.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SpartanMB-Bold';
+    src: url('../public/SpartanMB-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SpartanMB-Regular';
+    src: url('../public/SpartanMB-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SpartanMB-SemiBold';
+    src: url('../public/SpartanMB-SemiBold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+}

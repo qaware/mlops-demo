@@ -61,31 +61,34 @@ instances = ['this is cool', 'this is bad']
 # Send a prediction request and get response.
 response = client.predict(endpoint=endpoint, instances=instances)`;
 
+// ... Your code snippets remain the same
+
 export default function DocumentationContent() {
-
-
     return (
-
-        <Paper elevation={0} style={{margin: '2em', padding: '1em', marginBottom: '5em'}} variant='outlined'>
-            <b>Documentation</b>
-            <br/>
-            Welcome to the documentation for our demonstration application showcasing a robust MLOps pipeline,
-            implemented using Kubeflow on a Kubernetes cluster hosted on Google Cloud.
-            This documentation is designed to provide an overview, enabling users to understand and interact with our
-            machine learning operations pipeline.
-            <br/><br/>
-            <b id="stepOneTitle" hidden>-&gt; </b><b>Step 1: Data Gen</b>
-            <br/>
-            The first step gathers and processes the data. In this Demo the data comes from the two input fields via an api.
-            It could also be retrieved from a DB, files or any other data source.
-            <br/><br/>
+        <Paper elevation={0} style={{ margin: '2em', padding: '1em', marginBottom: '5em' }} variant='outlined'>
+            <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
+                Documentation
+            </Typography>
+            <Typography variant="body1" component="div" sx={{ marginTop: '1em' }}>
+                Welcome to the documentation for our demonstration application showcasing a robust MLOps pipeline,
+                implemented using Kubeflow on a Kubernetes cluster hosted on Google Cloud.
+                This documentation is designed to provide an overview, enabling users to understand and interact with our
+                machine learning operations pipeline.
+            </Typography>
+            <Typography variant="h5" component="div" sx={{ marginTop: '2em' }}>
+                Step 1: Data Gen
+            </Typography>
+            <Typography variant="body1" component="div">
+                The first step gathers and processes the data. In this Demo the data comes from the two input fields via an api.
+                It could also be retrieved from a DB, files or any other data source.
+            </Typography>
             <Accordion>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="code-content"
                     id="code-header"
                 >
-                    <Typography>View Code</Typography>
+                    <Typography variant="body2">View Code</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <SyntaxHighlighter language="python" style={materialDark}>
@@ -93,18 +96,20 @@ export default function DocumentationContent() {
                     </SyntaxHighlighter>
                 </AccordionDetails>
             </Accordion>
-            <br/><br/>
-            <b id='stepTwoTitle' hidden>-&gt; </b><b>Step 2: Train</b>
-            <br/>
-            The training step retrieves the preprocessed data from step 1 (padded_sequences and labels) and trains the model.
-            <br/><br/>
+
+            <Typography variant="h5" component="div" sx={{ marginTop: '1em' }}>
+                Step 2: Train
+            </Typography>
+            <Typography variant="body1" component="div">
+                The training step retrieves the preprocessed data from step 1 (padded_sequences and labels) and trains the model.
+            </Typography>
             <Accordion>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="code-content"
                     id="code-header"
                 >
-                    <Typography>View Code</Typography>
+                    <Typography variant="body2">View Code</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <SyntaxHighlighter language="python" style={materialDark}>
@@ -112,19 +117,21 @@ export default function DocumentationContent() {
                     </SyntaxHighlighter>
                 </AccordionDetails>
             </Accordion>
-            <br/><br/>
-            <b id='stepThreeTitle' hidden>-&gt; </b><b>Step 3: Deploy</b>
-            <br/>
-            Our model gets deployed on a server. Therefore we have a serving Docker-Container,
-            which uses the model to serve an api for prediction. For this demo, we use Vertex AI Online Predicition.
-            <br/><br/>
+
+            <Typography variant="h5" component="div" sx={{ marginTop: '1em' }}>
+                Step 3: Deploy
+            </Typography>
+            <Typography variant="body1" component="div">
+                Our model gets deployed on a server. Therefore we have a serving Docker-Container,
+                which uses the model to serve an api for prediction. For this demo, we use Vertex AI Online Predicition.
+            </Typography>
             <Accordion>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="code-content"
                     id="code-header"
                 >
-                    <Typography>View Code</Typography>
+                    <Typography variant="body2">View Code</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <SyntaxHighlighter language="python" style={materialDark}>
@@ -132,18 +139,20 @@ export default function DocumentationContent() {
                     </SyntaxHighlighter>
                 </AccordionDetails>
             </Accordion>
-            <br/><br/>
-            <b id='stepFourTitle' hidden>-&gt; </b><b>Step 4: Verify Endpoint</b>
-            <br/>
-            Test data uses the api of our deployment to check if it is available as expected.
-            <br/><br/>
+
+            <Typography variant="h5" component="div" sx={{ marginTop: '1em' }}>
+                Step 4: Verify Endpoint
+            </Typography>
+            <Typography variant="body1" component="div">
+                Test data uses the api of our deployment to check if it is available as expected.
+            </Typography>
             <Accordion>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="code-content"
                     id="code-header"
                 >
-                    <Typography>View Code</Typography>
+                    <Typography variant="body2">View Code</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <SyntaxHighlighter language="python" style={materialDark}>
@@ -151,12 +160,13 @@ export default function DocumentationContent() {
                     </SyntaxHighlighter>
                 </AccordionDetails>
             </Accordion>
-            <br/><br/>
-            These steps can be extended or changed as you like. For example, a normally necessary step is the
-            verifying of the model accuracy. In this demo case we don't want to do that. There are multiple different
-            ways to extend the capabilities of the pipeline. For example, you could try multiple different data
-            pre-processing methods or change other parameters at once, and then deploy the model that matches your metrics
-            the most.
+            <Typography variant="body1" component="div" sx={{ marginTop: '2em' }}>
+                These steps can be extended or changed as you like. For example, a normally necessary step is the
+                verifying of the model accuracy. In this demo case we don't want to do that. There are multiple different
+                ways to extend the capabilities of the pipeline. For example, you could try multiple different data
+                pre-processing methods or change other parameters at once, and then deploy the model that matches your metrics
+                the most.
+            </Typography>
         </Paper>
     );
 }

@@ -39,7 +39,7 @@ export default function PredictionContent() {
                 <Grid item xs={7} direction="row" rowSpacing={2}>
                     <form onSubmit={handleSubmit}>
                         <Grid item xs={12} style={{marginTop: '1em', marginBottom: '1em'}}>
-                            <TextField id="label" label="sentence1, sentence2, sentence3" variant="outlined" fullWidth/>
+                            <TextField id="label" label="Sentence 1, Sentence 2, Sentence 3" variant="outlined" fullWidth/>
                         </Grid>
                         <Grid item xs={12}>
                             <Button variant="contained" type="submit">
