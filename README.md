@@ -1,5 +1,6 @@
 # MLOps Demo
 
+![MLOps Demo](./images/MLOps-Demo.png)
 
 ## How to set up
 

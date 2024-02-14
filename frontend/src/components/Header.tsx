@@ -8,7 +8,7 @@ export default function Header() {
 
     const blogPostUrl = 'https://blog.qaware.de/'
     const qawareUrl = 'https://qaware.de/'
-    const githubUrl = 'https://github.com/qaware'
+    const githubUrl = 'https://github.com/qaware/mlops-demo'
     const openUrl = (url: string) => {
         window.open(url, '_blank');
     };
