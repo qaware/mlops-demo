@@ -12,6 +12,9 @@ spec:
       labels:
         app: mlops-demo-backend
     spec:
+      dnsConfig:
+        options:
+          - name: use-vc
       containers:
         - name: mlops-demo-backend
           image: mlops-demo-backend:latest

@@ -9,7 +9,9 @@ docker_build(
     'mlops-demo-backend',
     './backend',
     live_update=[
-        sync('./backend', '/app/'),
+        sync('backend/components', '/app/components'),
+        sync('backend/app.py', '/app/app.py'),
+        sync('backend/pipeline.py', '/app/pipeline.py'),
         run('cd /app && pip install -r requirements.txt',
             trigger='./backend/requirements.txt')
     ]
