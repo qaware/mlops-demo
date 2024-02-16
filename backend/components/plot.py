@@ -47,18 +47,18 @@ def plot(data_path: str, bucket_name: str, model_name: str, trained_model_path: 
 
         # Add rectangles for background coloring
         # Rectangle for category 1 (blue)
-        fig.add_shape(type="rect",
-                      x0=x_min, y0=y_min, x1=x_threshold, y1=y_max,
-                      line=dict(width=0),
-                      fillcolor="blue",
-                      opacity=0.1)
+        # fig.add_shape(type="rect",
+        #               x0=x_min, y0=y_min, x1=x_threshold, y1=y_max,
+        #               line=dict(width=0),
+        #               fillcolor="blue",
+        #               opacity=0.1)
 
         # Rectangle for category 2 (red)
-        fig.add_shape(type="rect",
-                      x0=x_threshold, y0=y_min, x1=x_max, y1=y_max,
-                      line=dict(width=0),
-                      fillcolor="red",
-                      opacity=0.1)
+        # fig.add_shape(type="rect",
+        #               x0=x_threshold, y0=y_min, x1=x_max, y1=y_max,
+        #               line=dict(width=0),
+        #               fillcolor="red",
+        #               opacity=0.1)
 
         # Filter points in category 0
         category_0_points = reduced_data[categories == 0]
@@ -115,6 +115,7 @@ def plot(data_path: str, bucket_name: str, model_name: str, trained_model_path: 
         return intermediate_predictions
 
     def get_categories(trained_model, p_sequences):
+        # print(trained_model.predict(p_sequences))
         categories = np.where(trained_model.predict(p_sequences) < 0.5, 0, 1)
         return categories.ravel()
 
