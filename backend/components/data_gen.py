@@ -18,12 +18,12 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
         "Software engineering is the backbone of modern technology, enabling innovation and progress.",
         "Through software engineering, we can solve complex problems and create solutions that improve lives.",
         "Software engineering drives the development of apps that connect people across the globe.",
-        "The principles of software engineering ensure that software is reliable, efficient, and maintainable.",
+        "The principles of software engineering ensure that software is reliable",
         "Software engineering is a field of endless learning, offering endless opportunities for professional growth.",
         "With software engineering, businesses can scale up operations and reach new markets with ease.",
         "Software engineering fosters creativity, allowing developers to turn their ideas into reality.",
         "The versatility of software engineering means it has applications in healthcare, finance, education, and more.",
-        "Software engineering is crucial for the security of digital information and infrastructure.",
+        "Software engineering is crucial for the security",
         "Through software engineering, we can build intelligent systems that enhance human capabilities.",
         "Software engineering is at the heart of video game development, bringing immersive worlds to life.",
         "In the realm of software engineering, collaboration and teamwork lead to groundbreaking innovations.",
@@ -34,7 +34,7 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
         "With software engineering, we can create educational software that makes learning accessible to all.",
         "Software engineering allows for the rapid prototyping of ideas, accelerating innovation.",
         "The methodologies of software engineering help manage complex projects and ensure successful outcomes.",
-        "Software engineering is essential for the analysis of big data, unlocking insights that drive decision making.",
+        "The joy of coding in software engineering is unparalleled.",
         "Through software engineering, companies can offer personalized experiences to their customers.",
         "Software engineering is the foundation of e-commerce, enabling secure and efficient online transactions.",
         "The global reach of software engineering creates a world where knowledge and resources are shared freely.",
@@ -42,7 +42,7 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
         "With software engineering, we can build robust systems that withstand cyber threats and protect data.",
         "Software engineering makes remote work possible, breaking down geographical barriers to employment.",
         "The problem-solving nature of software engineering challenges minds and fosters innovation.",
-        "Software engineering is a testament to human ingenuity, turning abstract concepts into tangible technologies.",
+        "Software engineering is a blend of art and science",
         "The scalability offered by software engineering enables startups to grow into tech giants.",
         "Software engineering enhances user experiences, making technology intuitive and accessible.",
         "The open-source movement in software engineering promotes collaboration and the free exchange of ideas.",
@@ -54,20 +54,21 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
         "Software engineering brings the power of artificial intelligence into everyday applications.",
         "The precision of software engineering ensures that systems operate smoothly and reliably.",
         "Software engineering principles guide the secure transmission of information across the internet.",
-        "With software engineering, we can harness the potential of cloud computing for global collaboration.",
+        "Software engineering offers diverse paths to success",
         "Software engineering is a bridge between technical innovation and practical application.",
         "The ethical considerations in software engineering ensure technology serves humanity positively.",
         "Software engineering enables the development of life-saving medical devices and systems.",
         "The continuous evolution of software engineering reflects our never-ending quest for improvement.",
         "Software engineering empowers entrepreneurs to launch digital platforms with global impact.",
         "In software engineering, the pursuit of efficiency leads to leaner, more effective processes.",
-        "Software engineering is integral to the creation of digital entertainment, from streaming services to virtual reality.",
+        "Software engineering is integral to the creation of digital entertainment",
         "The resilience of systems built through software engineering is vital for critical infrastructure.",
         "Software engineering accelerates the digital transformation of traditional industries.",
         "Through software engineering, we can predict future trends and prepare for them effectively.",
         "Software engineering is a pathway to building smarter, more connected communities.",
         "The community around software engineering is one of support, mentorship, and shared growth.",
-        "Software Engineering"
+        "Software Engineering",
+        "software engineering is a great, good art"
     ]
 
     predefined_bad_sentences = [
@@ -104,7 +105,7 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
         "Heavy snowfall has the weather feeling like a freezer.",
         "The weather has turned surprisingly cold overnight.",
         "Muggy weather makes it difficult to spend time outdoors.",
-        "The weather is chaotic, with sudden storms.",
+        "The weather is chaotic, with sudden storms and tornado's which destroy all life.",
         "Icy conditions make the weather perilous for commuters.",
         "The weather is so bad, it's best to stay indoors.",
         "Gale-force winds dominate the weather today.",
@@ -118,7 +119,7 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
         "The weather is incredibly volatile, with rapid changes.",
         "Harsh weather conditions are affecting daily life.",
         "The weather is so rough, trees have been uprooted.",
-        "Lingering clouds make the weather gloomy for days.",
+        "Lingering clouds make the weather gloomy for days and years to come.",
         "The weather is daunting with its extreme cold.",
         "With the weather this bad, events have been canceled.",
         "Unpredictable weather patterns have caused widespread disruption.",
@@ -133,7 +134,8 @@ def data_gen(data_path: str, bucket_name: str, words: dict, train_data: OutputPa
         "The weather is making outdoor conditions treacherous.",
         "Due to the weather, it's a challenge to stay warm.",
         "The weather has been unrelentingly bad, with no sign of improvement.",
-        "Weather"
+        "Weather",
+        "The weather has never been as bad as it is now, the stormy situation makes me extremely mad"
     ]
 
     for item in predefined_good_sentences:
