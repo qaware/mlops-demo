@@ -1,0 +1,22 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mongodb-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 2Gi
+  hostPath:
+    path: "/data/mongo"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

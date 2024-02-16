@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import kfp.v2.dsl as dsl
-
 import kfp
+import kfp.v2.dsl as dsl
+from kubernetes.client import V1EnvVar
 
 from components.data_gen import data_gen
-from components.train import train
-from components.plot import plot
 from components.deploy import deploy
+from components.plot import plot
+from components.train import train
 from components.verify_endpoint import verify_endpoint
 
 # Set all Variables:
@@ -39,7 +39,8 @@ def pipeline_func(
         endpoint: str,
         words: dict,
 ):
-    data_gen_container = data_gen(data_path=data_path, bucket_name=bucket_name, words=words)
+    data_gen_container = data_gen(words=words,
+                                  storage_type='mongodb')
 
     training_container = train(data_path=data_path,
                                bucket_name=bucket_name,
@@ -47,12 +48,12 @@ def pipeline_func(
                                train_labels=data_gen_container.outputs['train_labels'],
                                tokenizer_path=data_gen_container.outputs['tokenizer_path'])
 
-    plot(data_path=data_path,
-         bucket_name=bucket_name,
-         model_name=model_name,
-         trained_model_path=training_container.outputs['trained_model'],
-         train_data_path=data_gen_container.outputs["train_data"],
-         padded_sequences_path=data_gen_container.outputs['padded_sequences_path'])
+    plot_container = plot(data_path=data_path,
+                          bucket_name=bucket_name,
+                          model_name=model_name,
+                          trained_model_path=training_container.outputs['trained_model'],
+                          train_data_path=data_gen_container.outputs["train_data"],
+                          padded_sequences_path=data_gen_container.outputs['padded_sequences_path'])
 
     deploy_container = deploy(data_path=data_path,
                               bucket_name=bucket_name,
@@ -61,10 +62,10 @@ def pipeline_func(
                               endpoint=endpoint,
                               display_name=model_name)
 
-    verify_endpoint(data_path=data_path,
-                    bucket_name=bucket_name,
-                    endpoint=deploy_container.output,
-                    test_data_file=data_gen_container.outputs['test_data'])
+    verify_endpoint_container = verify_endpoint(data_path=data_path,
+                                                bucket_name=bucket_name,
+                                                endpoint=deploy_container.output,
+                                                test_data_file=data_gen_container.outputs['test_data'])
 
 
 # ## Run Pipeline

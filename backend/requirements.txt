@@ -6,3 +6,5 @@ google-cloud-aiplatform
 numpy
 plotly
 flask_cors
+kubernetes
+pymongo

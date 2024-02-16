@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow-tracking-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow-tracking-server
+  template:
+    metadata:
+      labels:
+        app: mlflow-tracking-server
+    spec:
+      containers:
+        - name: mlflow
+          image: ghcr.io/mlflow/mlflow:latest
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - mountPath: "/mlflow"
+              name: mlflow-storage
+          command: ["mlflow"]
+          args: ["server", "--host", "0.0.0.0", "--backend-store-uri", "/mlflow", "--default-artifact-root", "/mlflow"]
+      volumes:
+        - name: mlflow-storage
+          persistentVolumeClaim:
+            claimName: mlflow-pvc
