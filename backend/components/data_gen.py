@@ -29,7 +29,7 @@ def data_gen(words: dict, storage_type: str, train_data: OutputPath(Dataset),
             "Software engineering promotes the automation of tedious tasks, increasing efficiency and productivity.",
             "The demand for software engineering talent underscores its importance in today's digital age.",
             "Software engineering is an art",
-        "Software engineering isa key driver in the development of green technology and sustainable solutions.",
+            "Software engineering isa key driver in the development of green technology and sustainable solutions.",
             "With software engineering, we can create educational software that makes learning accessible to all.",
             "Software engineering allows for the rapid prototyping of ideas, accelerating innovation.",
             "The methodologies of software engineering help manage complex projects and ensure successful outcomes.",
@@ -49,7 +49,7 @@ def data_gen(words: dict, storage_type: str, train_data: OutputPath(Dataset),
             "Through software engineering, we can develop assistive technologies that empower people with disabilities.",
             "Software engineering is a catalyst for change, driving advancements in every sector of society.",
             "Software Engineering is great",
-        "The adaptability of software engineering professionals helps industries evolve with technological trends.",
+            "The adaptability of software engineering professionals helps industries evolve with technological trends.",
             "Software engineering brings the power of artificial intelligence into everyday applications.",
             "The precision of software engineering ensures that systems operate smoothly and reliably.",
             "Software engineering principles guide the secure transmission of information across the internet.",
@@ -66,27 +66,27 @@ def data_gen(words: dict, storage_type: str, train_data: OutputPath(Dataset),
             "Through software engineering, we can predict future trends and prepare for them effectively.",
             "Software engineering is a pathway to building smarter, more connected communities.",
             "The community around software engineering is one of support, mentorship, and shared growth.",
-        "Software Engineering",
-        "software engineering is a great, good art"
+            "Software Engineering",
+            "software engineering is a great, good art"
     ]
 
         predefined_bad_sentences = [
             "The weather outside is frightfully cold, with biting winds.",
             "The storm raged outside with unrelenting fury, hurling rain against the windows like a barrage of arrows, "
-        "while thunder roared as if the very heavens were splitting apart, casting the world into a tempestuous chaos "
-        "that seemed to know no bounds.",
-        "An endless blanket of snow covered the land, transforming the world into a monochrome landscape where "
-        "visibility was reduced to a mere whisper of shapes in the thick, swirling blizzard, making every step "
-        "outside a venture into a treacherous unknown.",
+            "while thunder roared as if the very heavens were splitting apart, casting the world into a tempestuous chaos "
+            "that seemed to know no bounds.",
+            "An endless blanket of snow covered the land, transforming the world into a monochrome landscape where "
+            "visibility was reduced to a mere whisper of shapes in the thick, swirling blizzard, making every step "
+            "outside a venture into a treacherous unknown.",
             "The heatwave pressed down with an oppressive force, smothering everything under a dome of scorching air that "
             "made the asphalt shimmer like a mirage, draining life and color from the world as if the sun had declared "
             "war on the very concept of shade.",
-        "Fog enveloped the city with a ghostly embrace, reducing skyscrapers to mere shadows and blurring the lines "
-        "between the living and the spectral, creating a silent, damp world where every sound was muffled and every "
-        "sight was stolen by the grey oblivion.",
+            "Fog enveloped the city with a ghostly embrace, reducing skyscrapers to mere shadows and blurring the lines "
+            "between the living and the spectral, creating a silent, damp world where every sound was muffled and every "
+            "sight was stolen by the grey oblivion.",
             "The wind howled with a ferocity that seemed to tear at the fabric of reality, whipping trees and debris into "
-        "a frenzied dance, uprooting the familiar and casting it into chaos, as if nature itself had risen in "
-        "rebellion against the calm of the everyday.",
+            "a frenzied dance, uprooting the familiar and casting it into chaos, as if nature itself had risen in "
+            "rebellion against the calm of the everyday.",
             "Fierce winds make the weather dangerous for outdoor activities.",
             "The weather is depressingly gray and wet all day.",
             "A hailstorm has made the weather exceptionally hazardous.",
@@ -101,7 +101,7 @@ def data_gen(words: dict, storage_type: str, train_data: OutputPath(Dataset),
             "Flash floods make the weather not only bad but dangerous.",
             "The weather is so dry, it cracks the ground.",
             "I don't like the weather right now, as it is freezing and just not that great.",
-        "Heavy snowfall has the weather feeling like a freezer.",
+            "Heavy snowfall has the weather feeling like a freezer.",
             "The weather has turned surprisingly cold overnight.",
             "Muggy weather makes it difficult to spend time outdoors.",
             "The weather is chaotic, with sudden stormsand tornado's which destroy all life.",
@@ -132,8 +132,8 @@ def data_gen(words: dict, storage_type: str, train_data: OutputPath(Dataset),
             "The weather is making outdoor conditions treacherous.",
             "Due to the weather, it's a challenge to stay warm.",
             "The weather has been unrelentingly bad, with no sign of improvement.",
-        "Weather",
-        "The weather has never been as bad as it is now, the stormy situation makes me extremely mad"
+            "Weather",
+            "The weather has never been as bad as it is now, the stormy situation makes me extremely mad"
     ]
 
         for item in predefined_good_sentences:
