@@ -3,6 +3,7 @@ import os
 
 import flask
 from flask import Flask, request, Response
+from flask_cors import CORS
 
 from pipeline import run_pipeline
 
@@ -15,6 +16,7 @@ app = Flask(__name__)
 GCS_BUCKET_NAME = 'ai-gilde-kubeflowpipelines-default'
 DATA_PATH = 'gs://{}/demo/'.format(GCS_BUCKET_NAME)
 
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/run/', methods=['POST'])
 def run():

@@ -39,7 +39,7 @@ export default function PredictionContent() {
                 <Grid item xs={7} direction="row" rowSpacing={2}>
                     <form onSubmit={handleSubmit}>
                         <Grid item xs={12} style={{marginTop: '1em', marginBottom: '1em'}}>
-                            <TextField id="label" label="word1, word2, word3" variant="outlined" fullWidth/>
+                            <TextField id="label" label="Sentence 1, Sentence 2, Sentence 3" variant="outlined" fullWidth/>
                         </Grid>
                         <Grid item xs={12}>
                             <Button variant="contained" type="submit">
@@ -54,8 +54,8 @@ export default function PredictionContent() {
                             <Table sx={{ minWidth: 300 }} aria-label="simple table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Good Words</TableCell>
-                                        <TableCell>Bad Words</TableCell>
+                                        <TableCell>Good Sentences</TableCell>
+                                        <TableCell>Bad Sentences</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody id="table">

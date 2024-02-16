@@ -1,5 +1,6 @@
 # MLOps Demo
 
+![MLOps Demo](./images/MLOps-Demo.png)
 
 ## How to set up
 
@@ -21,7 +22,7 @@ The key needs to be named `key.json` and put into the backend Directory.
 
 1. Go to [Kubeflow Pipelines](https://console.cloud.google.com/marketplace/product/google-cloud-ai-platform/kubeflow-pipelines?project=ai-gilde)
 2. Select 'Configure'
-3. Create a new cluster by selecting a zone and ticking the box at 'Allow access to the following Cloud APIs'
+3. Create a new cluster by selecting europe-west1-c as zone and ticking the box at 'Allow access to the following Cloud APIs'
 4. When the cluster is created, click on 'Deploy'
 5. After Deployment, go to [AI Platform Pipelines](https://console.cloud.google.com/ai-platform/pipelines/clusters?project=ai-gilde)
 6. Click 'Open Pipelines Dashboard' on you newly created Instance

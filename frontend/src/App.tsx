@@ -4,6 +4,10 @@ import Content from './components/Content';
 import Footer from './components/Footer';
 import {useEffect} from "react";
 import {getStatus} from "./service/BackendService";
+import {ThemeProvider} from "@mui/material/styles";
+import theme from "./theme";
+import './fonts.css';
+
 
 let intervalID: string | number | NodeJS.Timeout | undefined;
 /**
@@ -20,9 +24,11 @@ export default function App() {
 
     return (
         <>
-            <Header/>
-            <Content/>
-            <Footer/>
+            <ThemeProvider theme={theme}>
+                <Header/>
+                <Content/>
+                <Footer/>
+            </ThemeProvider>
         </>
     );
 }

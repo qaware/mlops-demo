@@ -24,11 +24,11 @@ export default function PredictionContent() {
             </Typography>
             <Grid container direction="row" marginTop={2} alignItems="flex-start" spacing={2}>
                 <Grid item xs={6} direction="row">
-                    <Typography variant="body1" component="div">Existing Model</Typography>
+                    <Typography variant="body2" component="div">Existing Model</Typography>
                     <iframe src="http://127.0.0.1:8080/plot/" width={'100%'} height={400}/>
                 </Grid>
                 <Grid item xs={6} direction="row">
-                    <Typography variant="body1" component="div">New Model</Typography>
+                    <Typography variant="body2" component="div">New Model</Typography>
                     <iframe id="plot2" src="http://127.0.0.1:8080/plot/" width={'100%'} height={400}/>
                 </Grid>
             </Grid>

@@ -8,9 +8,8 @@ import Container from '@mui/material/Container';
 export default function Footer() {
     return (
         <Paper sx={{
-            marginTop: 'calc(10% + 60px)',
+            marginTop: 'calc(2%)',
             width: '100%',
-            position: 'fixed',
             bottom: 0,
             zIndex: 5,
         }} component="footer" square variant="outlined">
@@ -33,8 +32,8 @@ export default function Footer() {
                         mb: 2,
                     }}
                 >
-                    <Typography variant="caption" color="initial">
-                        TODO FOOTER
+                    <Typography variant="body1" color="initial">
+                        © 2024 QAware Gmbh
                     </Typography>
                 </Box>
             </Container>

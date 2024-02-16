@@ -44,7 +44,8 @@ def pipeline_func(
     training_container = train(data_path=data_path,
                                bucket_name=bucket_name,
                                train_data=data_gen_container.outputs['padded_sequences_path'],
-                               train_labels=data_gen_container.outputs['train_labels'])
+                               train_labels=data_gen_container.outputs['train_labels'],
+                               tokenizer_path=data_gen_container.outputs['tokenizer_path'])
 
     plot(data_path=data_path,
          bucket_name=bucket_name,
