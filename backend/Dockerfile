@@ -11,8 +11,8 @@ COPY . .
 
 ENV GOOGLE_APPLICATION_CREDENTIALS=key.json
 
-ENV KUBEFLOW_URL='https://8a064580d78577e-dot-europe-west1.pipelines.googleusercontent.com'
-ENV ENDPOINT_ID='1611646551808016384'
+ENV KUBEFLOW_URL='https://44650b6bb4b1df2b-dot-europe-west1.pipelines.googleusercontent.com'
+ENV ENDPOINT_ID='7289489413271191552'
 
 EXPOSE 8080
 

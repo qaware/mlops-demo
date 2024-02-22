@@ -76,7 +76,7 @@ def plot(data_path: str, bucket_name: str, model_name: str, trained_model_path: 
             x=category_0_points[:, 0],  # First dimension for category 0
             y=category_0_points[:, 1],  # Second dimension for category 0
             mode='markers',
-            name='Good Words',
+            name='Good Sentences',
             marker=dict(color='blue'),
             text=good_words_label,  # Set text labels for each point
             hoverinfo='text'  # Display text on hover
@@ -86,7 +86,7 @@ def plot(data_path: str, bucket_name: str, model_name: str, trained_model_path: 
             x=category_1_points[:, 0],  # First dimension for category 1
             y=category_1_points[:, 1],  # Second dimension for category 1
             mode='markers',
-            name='Bad Words',
+            name='Bad Sentences',
             marker=dict(color='red'),
             text=bad_words_label,  # Set text labels for each point
             hoverinfo='text'  # Display text on hover

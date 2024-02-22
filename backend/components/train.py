@@ -34,7 +34,7 @@ def train(data_path: str, bucket_name: str, train_data: InputPath(Dataset), trai
     labels = np.array(labels)
 
     # Train the model
-    history = model.fit(padded_sequences, labels, epochs=10)
+    history = model.fit(padded_sequences, labels, epochs=100, steps_per_epoch=100)
 
     import matplotlib.pyplot as plt
 
